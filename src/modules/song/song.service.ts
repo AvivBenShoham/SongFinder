@@ -20,6 +20,7 @@ export class SongService {
   }
 
   async insert(song: createSongDto): Promise<Song> {
-    return this.songRepository.save(song);
+    const newSong = this.songRepository.create(song);
+    return this.songRepository.save(newSong);
   }
 }

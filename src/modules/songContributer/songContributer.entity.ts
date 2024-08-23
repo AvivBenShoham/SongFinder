@@ -18,8 +18,8 @@ export class SongContributer {
   type: ContributerType;
 
   @ManyToMany(() => Artist, (artist) => artist.contributions)
-  artist: Artist;
+  artistId: number;
 
-  @ManyToOne(() => Song, (song) => song.contributers)
-  song: Song;
+  // @ManyToOne(() => Song, (song) => song.contributers)
+  songId: number;
 }

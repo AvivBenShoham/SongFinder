@@ -22,9 +22,11 @@ export class Song {
   @Column({ type: 'varchar', length: 500, nullable: true, name: 'cover_url' })
   coverUrl: URL;
 
-  @OneToMany(() => SongWord, (songWord) => songWord.word)
-  lyrics: SongWord[];
+  //TODO: need to understand how these relations work
+  
+  // @OneToMany(() => SongWord, (songWord) => songWord.word)
+  // lyrics: SongWord[];
 
-  @OneToMany(() => SongContributer, (contributer) => contributer.song)
-  contributers: SongContributer[];
+  // @OneToMany(() => SongContributer, (contributer) => contributer.songId)
+  // contributers: SongContributer[];
 }

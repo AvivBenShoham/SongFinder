@@ -15,7 +15,12 @@ export class Artist {
   @PrimaryColumn({ type: 'varchar', length: 255 })
   name: string;
 
-  @Column({ type: 'varchar', length: 255, name: 'lowercased_name' })
+  @Column({
+    type: 'varchar',
+    length: 255,
+    name: 'lowercased_name',
+    unique: true,
+  })
   lowercasedName: string;
 
   @Column({
@@ -26,6 +31,6 @@ export class Artist {
   })
   imageUrl: URL;
 
-  @OneToMany(() => SongContributer, (contributer) => contributer.artist)
+  @OneToMany(() => SongContributer, (contributer) => contributer.artistId)
   contributions: SongContributer[];
 }

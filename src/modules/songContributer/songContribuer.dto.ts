@@ -1,6 +1,7 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { Artist } from '../artist/artist.entity';
 import { IsEnum, IsNotEmpty, IsString } from 'class-validator';
+import { Transform } from 'class-transformer';
 
 export enum ContributerType {
   PRODUCER = 'producer',
@@ -18,5 +19,12 @@ export default class addContributer {
   @ApiProperty({ type: 'string' })
   @IsNotEmpty()
   @IsString()
+  @Transform((param) => param.value.toLocaleLowerCase())
   artistName: Artist['name'];
+}
+
+export class createContributerDto {
+  type: ContributerType;
+  artistId: number;
+  songId: number;
 }
