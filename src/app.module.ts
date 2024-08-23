@@ -20,6 +20,8 @@ import { SongService } from './modules/song/song.service';
 import { HealthController } from './health/health.controller';
 import { TerminusModule } from '@nestjs/terminus';
 import { HealthModule } from './health/health.module';
+import { SongWordController } from './modules/songWord/songWord.controller';
+import { SongWordService } from './modules/songWord/songWord.service';
 
 //TODO: .env not getting imported
 
@@ -47,7 +49,8 @@ import { HealthModule } from './health/health.module';
     AppController,
     ArtistController,
     HealthController,
+    SongWordController,
   ],
-  providers: [SongService, AppService, ArtistService],
+  providers: [SongService, AppService, ArtistService, SongWordService],
 })
 export class AppModule {}

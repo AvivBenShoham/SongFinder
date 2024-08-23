@@ -13,7 +13,7 @@ export class SongWord {
   @PrimaryColumn({ type: 'int' })
   @ManyToOne(() => Song, (song) => song.songId)
   @JoinColumn({ name: 'songId' })
-  song: Song;
+  song: number;
 
   @PrimaryColumn({ type: 'int' })
   row: number;
