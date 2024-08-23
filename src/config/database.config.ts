@@ -1,10 +1,5 @@
 import { TypeOrmModuleOptions } from "@nestjs/typeorm";
-import { Artist } from "src/modules/artist/artist.entity";
-import { Song } from "src/modules/song/song.entity";
-import { SongContributor } from "src/modules/songContributer/songContributer.entity";
-import { SongPhrase } from "src/modules/songPhrase/songPhrase.entity";
-import { SongWord } from "src/modules/songWord/songWord.entity";
-import { WordGroup } from "src/modules/wordGroup/wordGroup.entity";
+import { Song, SongContributer, SongPhrase, SongWord, WordGroup, Artist } from 'src/imports/entities';
 import 'dotenv/config';
 
 export default () => ({
@@ -14,6 +9,6 @@ export default () => ({
     username: process.env.DB_USERNAME || 'songfinder',
     password: process.env.DB_USERNAME || 'amitandaviv',
     database: process.env.DB_NAME || 'song_finder',
-    entities: [Song, SongWord, SongContributor, Artist, WordGroup, SongPhrase],
+    entities: [Song, SongWord, SongContributer, Artist, WordGroup, SongPhrase],
     synchronize: true
 } as TypeOrmModuleOptions);

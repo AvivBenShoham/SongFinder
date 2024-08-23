@@ -8,7 +8,7 @@ import {
 import { Song } from '../song/song.entity';
 import { Artist } from '../artist/artist.entity';
 
-export enum ContributorType {
+export enum ContributerType {
   PRODUCER = 'producer',
   SINGER = 'singer',
   WRITER = 'writer',
@@ -16,16 +16,16 @@ export enum ContributorType {
 }
 
 @Entity()
-export class SongContributor {
+export class SongContributer {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @Column({ type: 'enum', enum: ContributorType })
-  type: ContributorType;
+  @Column({ type: 'enum', enum: ContributerType })
+  type: ContributerType;
 
   @ManyToMany(() => Artist, (artist) => artist.contributions)
   artist: Artist;
 
-  @ManyToOne(() => Song, (song) => song.contributors)
+  @ManyToOne(() => Song, (song) => song.contributers)
   song: Song;
 }

@@ -7,6 +7,6 @@ export class SongController {
 
     @Get('')
     findAll() {
-        return this.songService.findByName
+        return this.songService.findAll()
     }
 }

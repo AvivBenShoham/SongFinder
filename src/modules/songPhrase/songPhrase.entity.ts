@@ -1,7 +1,7 @@
 import { Entity, Column, PrimaryColumn, ManyToOne, JoinColumn } from 'typeorm';
 import { Song } from '../song/song.entity';
 
-@Entity()
+@Entity({ name: 'song_phrases' })
 export class SongPhrase {
   @PrimaryColumn({ type: 'varchar', length: 100 })
   phrase: string;

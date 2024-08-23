@@ -1,5 +1,5 @@
 import { Entity, Column, PrimaryGeneratedColumn, OneToMany } from 'typeorm';
-import { SongContributor } from '../songContributer/songContributer.entity';
+import { SongContributer } from '../songContributer/songContributer.entity';
 import { SongWord } from '../songWord/songWord.entity';
 
 @Entity({ name: 'songs' })
@@ -25,6 +25,6 @@ export class Song {
   @OneToMany(() => SongWord, (songWord) => songWord.word)
   lyrics: SongWord[];
 
-  @OneToMany(() => SongContributor, (contributor) => contributor.song)
-  contributors: SongContributor[];
+  @OneToMany(() => SongContributer, (contributer) => contributer.song)
+  contributers: SongContributer[];
 }

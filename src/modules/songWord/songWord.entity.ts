@@ -1,8 +1,8 @@
-import { Entity, Column, PrimaryColumn, ManyToOne, JoinColumn, OneToMany } from 'typeorm';
+import { Entity, PrimaryColumn, ManyToOne, JoinColumn } from 'typeorm';
 import { Song } from '../song/song.entity';
 import { Word } from '../word/word.entity';
 
-@Entity()
+@Entity({ name: 'song_words' })
 export class SongWord {
   @PrimaryColumn({ type: 'varchar', length: 30 })
   word: Word;
