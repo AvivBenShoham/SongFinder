@@ -7,13 +7,7 @@ import {
 } from 'typeorm';
 import { Song } from '../song/song.entity';
 import { Artist } from '../artist/artist.entity';
-
-export enum ContributerType {
-  PRODUCER = 'producer',
-  SINGER = 'singer',
-  WRITER = 'writer',
-  COMPOSITOR = 'compositor',
-}
+import { ContributerType } from './songContribuer.dto';
 
 @Entity()
 export class SongContributer {

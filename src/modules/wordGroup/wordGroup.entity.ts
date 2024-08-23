@@ -1,4 +1,4 @@
-import { Entity, Column, PrimaryColumn, ManyToOne, JoinColumn } from 'typeorm';
+import { Entity, PrimaryColumn } from 'typeorm';
 import { Word } from '../word/word.entity';
 
 @Entity({ name: 'word_group' })

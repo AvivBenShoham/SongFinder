@@ -3,7 +3,14 @@ import { ConfigModule } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import configuration from './config/configuration';
 import databaseConfig from './config/database.config';
-import { Song, SongContributer, SongPhrase, SongWord, WordGroup, Artist } from './imports/entities';
+import {
+  Song,
+  SongContributer,
+  SongPhrase,
+  SongWord,
+  WordGroup,
+  Artist,
+} from './imports/entities';
 import { SongController } from './modules/song/song.controller';
 import { ArtistController } from './modules/artist/artist.controller';
 import { AppController } from './app.controller';
@@ -15,10 +22,21 @@ import { SongService } from './modules/song/song.service';
 
 @Module({
   imports: [
-    ConfigModule.forRoot({ isGlobal: true, envFilePath: './config/.env', load: [configuration]}), 
-    TypeOrmModule.forFeature([Song, SongWord, SongContributer, Artist, WordGroup, SongPhrase]),
-    TypeOrmModule.forRoot(databaseConfig())
-],
+    ConfigModule.forRoot({
+      isGlobal: true,
+      envFilePath: './config/.env',
+      load: [configuration],
+    }),
+    TypeOrmModule.forFeature([
+      Song,
+      SongWord,
+      SongContributer,
+      Artist,
+      WordGroup,
+      SongPhrase,
+    ]),
+    TypeOrmModule.forRoot(databaseConfig()),
+  ],
   controllers: [SongController, AppController, ArtistController],
   providers: [SongService, AppService, ArtistService],
 })

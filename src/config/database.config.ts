@@ -1,8 +1,16 @@
-import { TypeOrmModuleOptions } from "@nestjs/typeorm";
-import { Song, SongContributer, SongPhrase, SongWord, WordGroup, Artist } from 'src/imports/entities';
+import { TypeOrmModuleOptions } from '@nestjs/typeorm';
+import {
+  Song,
+  SongContributer,
+  SongPhrase,
+  SongWord,
+  WordGroup,
+  Artist,
+} from 'src/imports/entities';
 import 'dotenv/config';
 
-export default () => ({
+export default () =>
+  ({
     type: 'postgres',
     host: process.env.DB_HOST || 'localhost',
     port: process.env.DB_PORT ? parseInt(process.env.DB_PORT) : 5432,
@@ -10,5 +18,5 @@ export default () => ({
     password: process.env.DB_USERNAME || 'amitandaviv',
     database: process.env.DB_NAME || 'song_finder',
     entities: [Song, SongWord, SongContributer, Artist, WordGroup, SongPhrase],
-    synchronize: true
-} as TypeOrmModuleOptions);
+    synchronize: true,
+  }) as TypeOrmModuleOptions;

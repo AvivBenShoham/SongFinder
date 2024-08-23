@@ -1,4 +1,4 @@
-import { Entity, Column, PrimaryColumn, ManyToOne, JoinColumn } from 'typeorm';
+import { Entity, PrimaryColumn, JoinColumn } from 'typeorm';
 import { Song } from '../song/song.entity';
 
 @Entity({ name: 'song_phrases' })

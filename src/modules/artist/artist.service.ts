@@ -15,6 +15,6 @@ export class ArtistService {
   }
 
   async findByName(name: string): Promise<Artist[]> {
-    return this.artistRepository.findBy({ name })
+    return this.artistRepository.findBy({ name });
   }
 }
