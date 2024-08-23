@@ -3,15 +3,21 @@
     "request": "launch",
     "name": "Nest Debug",
     "runtimeExecutable": "npm",
+    "program": "${workspaceFolder}/src/main.ts",
+    "preLaunchTask": "npm: build",
     "runtimeArgs": [
       "run",
       "start:debug",
+      "--entryFile src/main.ts",
       "--",
-      "--inspect-brk"
+      "--inspect-brk",
     ],
     "console": "integratedTerminal",
     "restart": true,
     "protocol": "auto",
     "port": 9229,
-    "autoAttachChildProcesses": true
+    "autoAttachChildProcesses": true,
+    "configurations": [
+    
+    ]
 }

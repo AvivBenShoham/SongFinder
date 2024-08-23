@@ -11,7 +11,7 @@ import {
 } from 'class-validator';
 import { Type } from 'class-transformer';
 
-export default class createSongDto {
+export default class createSongReqDto {
   @ApiProperty()
   @IsNotEmpty()
   name: string;
@@ -44,4 +44,11 @@ export default class createSongDto {
   @ValidateNested({ each: true })
   @Type(() => addContributer)
   contributers: addContributer[];
+}
+
+export class createSongDto {
+  name: string;
+  album?: string;
+  releaseDate: Date;
+  coverUrl?: URL;
 }

@@ -30,4 +30,41 @@ export class SongWordService {
     const newSongWord = this.songWordRepository.create(songWord);
     return this.songWordRepository.save(newSongWord);
   }
+
+  async insertMany(songWords: SongWord[]): Promise<SongWord[]> {
+    const newSongWords = this.songWordRepository.create(songWords);
+    return this.songWordRepository.save(newSongWords);
+  }
+
+  convertLyricsToSongWords(lyrics: string, songId: number): SongWord[] {
+    const songWords: SongWord[] = [];
+    let currLine = 1;
+    let currRow = 1;
+    let currStanza = 1;
+    lyrics.split('\n').forEach((line) => {
+      // if the line is seperating between stanzas
+      if (line === '') {
+        currStanza++;
+        currLine = 1;
+      } else {
+        let currColl = 1;
+        line.split(' ').forEach((word) => {
+          const songWord: SongWord = {
+            actualWord: word,
+            word: word.toLocaleLowerCase(),
+            line: currLine,
+            stanza: currStanza,
+            col: currColl,
+            row: currRow,
+            song: songId,
+          };
+          songWords.push(songWord);
+          currColl++;
+        });
+      }
+
+      currRow++;
+    });
+    return songWords;
+  }
 }

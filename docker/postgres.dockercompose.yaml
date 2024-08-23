@@ -11,3 +11,12 @@ services:
       - POSTGRES_PASSWORD=amitandaviv
       - POSTGRES_USER=songfinder
       - POSTGRES_DB=song_finder
+  pgAdmin:
+    image: dpage/pgadmin4
+    ports:
+      - "8888:80"
+    volumes:
+      - ~/app/pgadmin-data:/var/lib/pgadmin
+    environment:
+      PGADMIN_DEFAULT_EMAIL: aviv@gmail.com
+      PGADMIN_DEFAULT_PASSWORD: songfinder

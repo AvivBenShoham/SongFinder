@@ -1,13 +1,12 @@
 import { Entity, PrimaryColumn, ManyToOne, JoinColumn } from 'typeorm';
 import { Song } from '../song/song.entity';
-import { Word } from '../word/word.entity';
 
 @Entity({ name: 'song_words' })
 export class SongWord {
   @PrimaryColumn({ type: 'varchar', length: 30 })
-  word: Word;
+  word: string;
 
-  @PrimaryColumn({ type: 'varchar', length: 30 })
+  @PrimaryColumn({ type: 'varchar', length: 30, name: 'actual_word' })
   actualWord: string;
 
   @PrimaryColumn({ type: 'int' })

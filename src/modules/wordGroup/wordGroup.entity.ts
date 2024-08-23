@@ -6,6 +6,6 @@ export class WordGroup {
   @PrimaryColumn({ type: 'varchar', length: 30 })
   word: Word;
 
-  @PrimaryColumn({ type: 'varchar', length: 50 })
+  @PrimaryColumn({ type: 'varchar', length: 50, name: 'group_name' })
   groupName: string;
 }

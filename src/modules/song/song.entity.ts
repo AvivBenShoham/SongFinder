@@ -13,13 +13,13 @@ export class Song {
   @Column({ type: 'varchar', length: 50, nullable: true })
   album: string;
 
-  @Column({ type: 'date' })
+  @Column({ type: 'date', name: 'release_date' })
   releaseDate: Date;
 
-  @Column({ type: 'date', default: new Date() })
+  @Column({ type: 'date', default: new Date(), name: 'created_at' })
   createdAt: Date;
 
-  @Column({ type: 'varchar', length: 500, nullable: true })
+  @Column({ type: 'varchar', length: 500, nullable: true, name: 'cover_url' })
   coverUrl: URL;
 
   @OneToMany(() => SongWord, (songWord) => songWord.word)
