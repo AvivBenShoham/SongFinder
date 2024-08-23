@@ -17,6 +17,9 @@ import { AppController } from './app.controller';
 import { ArtistService } from './modules/artist/artist.service';
 import { AppService } from './app.service';
 import { SongService } from './modules/song/song.service';
+import { HealthController } from './health/health.controller';
+import { TerminusModule } from '@nestjs/terminus';
+import { HealthModule } from './health/health.module';
 
 //TODO: .env not getting imported
 
@@ -36,8 +39,15 @@ import { SongService } from './modules/song/song.service';
       SongPhrase,
     ]),
     TypeOrmModule.forRoot(databaseConfig()),
+    TerminusModule.forRoot({}),
+    HealthModule,
   ],
-  controllers: [SongController, AppController, ArtistController],
+  controllers: [
+    SongController,
+    AppController,
+    ArtistController,
+    HealthController,
+  ],
   providers: [SongService, AppService, ArtistService],
 })
 export class AppModule {}
