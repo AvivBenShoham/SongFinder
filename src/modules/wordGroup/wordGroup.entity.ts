@@ -1,10 +1,11 @@
-import { Entity, Column, PrimaryColumn } from 'typeorm';
+import { Entity, Column, PrimaryColumn, ManyToOne, JoinColumn } from 'typeorm';
+import { Word } from '../word/word.entity';
 
 @Entity()
 export class WordGroup {
   @PrimaryColumn({ type: 'varchar', length: 30 })
-  word: string;
+  word: Word;
 
-  @Column({ type: 'varchar', length: 50 })
+  @PrimaryColumn({ type: 'varchar', length: 50 })
   groupName: string;
 }

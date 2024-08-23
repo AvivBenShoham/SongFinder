@@ -1,17 +1,15 @@
-import { Entity, Column, PrimaryColumn, ManyToOne, JoinColumn, OneToMany } from 'typeorm';
+import { Entity, Column, PrimaryColumn, ManyToOne, JoinColumn } from 'typeorm';
 import { Song } from '../song/song.entity';
-import { Word } from '../word/word.entity';
 
 @Entity()
-export class SongWord {
-  @PrimaryColumn({ type: 'varchar', length: 30 })
-  word: Word;
+export class SongPhrase {
+  @PrimaryColumn({ type: 'varchar', length: 100 })
+  phrase: string;
 
-  @PrimaryColumn({ type: 'varchar', length: 30 })
-  actualWord: string;
+  @PrimaryColumn({ type: 'varchar', length: 100 })
+  actualPhrase: string;
 
   @PrimaryColumn({ type: 'int' })
-  @ManyToOne(() => Song, (song) => song.songId)
   @JoinColumn({ name: 'songId' })
   song: Song;
 

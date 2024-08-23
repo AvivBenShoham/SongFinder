@@ -9,7 +9,7 @@ export class Artist {
   @Column({ type: 'varchar', length: 255 })
   name: string;
 
-  @Column({ type: 'varchar', length: 255 })
+  @Column({ type: 'varchar', length: 255, nullable: true })
   imageUrl: URL;
 
   @OneToMany(() => SongContributor, (contributor) => contributor.artist)

@@ -1,8 +1,8 @@
 import { Entity, Column, PrimaryGeneratedColumn, OneToMany } from 'typeorm';
-import { Lyrics } from '../lyrics/lyrics.entity';
 import { SongContributor } from '../songContributer/songContributer.entity';
+import { SongWord } from '../songWord/songWord.entity';
 
-@Entity()
+@Entity({ name: 'songs' })
 export class Song {
   @PrimaryGeneratedColumn()
   songId: number;
@@ -10,17 +10,20 @@ export class Song {
   @Column({ type: 'varchar', length: 50 })
   name: string;
 
-  @Column({ type: 'varchar', length: 50 })
+  @Column({ type: 'varchar', length: 50, nullable: true })
   album: string;
 
   @Column({ type: 'date' })
   releaseDate: Date;
 
-  @Column({ type: 'varchar', length: 500 })
-  coverUrl: string;
+  @Column({ type: 'date', default: new Date() })
+  createdAt: Date;
 
-  @OneToMany(() => Lyrics, (lyrics) => lyrics.song)
-  lyrics: Lyrics[];
+  @Column({ type: 'varchar', length: 500, nullable: true })
+  coverUrl: URL;
+
+  @OneToMany(() => SongWord, (songWord) => songWord.word)
+  lyrics: SongWord[];
 
   @OneToMany(() => SongContributor, (contributor) => contributor.song)
   contributors: SongContributor[];

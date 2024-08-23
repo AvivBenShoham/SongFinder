@@ -1,4 +1,10 @@
-import { Entity, Column, PrimaryGeneratedColumn, ManyToOne } from 'typeorm';
+import {
+  Entity,
+  Column,
+  PrimaryGeneratedColumn,
+  ManyToOne,
+  ManyToMany,
+} from 'typeorm';
 import { Song } from '../song/song.entity';
 import { Artist } from '../artist/artist.entity';
 
@@ -12,15 +18,12 @@ export enum ContributorType {
 @Entity()
 export class SongContributor {
   @PrimaryGeneratedColumn()
-  artistId: number;
-
-  @Column()
-  songId: number;
+  id: number;
 
   @Column({ type: 'enum', enum: ContributorType })
   type: ContributorType;
 
-  @ManyToOne(() => Artist, (artist) => artist.contributions)
+  @ManyToMany(() => Artist, (artist) => artist.contributions)
   artist: Artist;
 
   @ManyToOne(() => Song, (song) => song.contributors)
