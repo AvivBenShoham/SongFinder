@@ -4,8 +4,6 @@ import {
   PrimaryGeneratedColumn,
   ManyToOne,
   JoinColumn,
-  PrimaryColumn,
-  Generated,
 } from 'typeorm';
 import { Song } from '../song/song.entity';
 import { Artist } from '../artist/artist.entity';
