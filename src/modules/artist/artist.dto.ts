@@ -8,7 +8,7 @@ export class createArtistDto {
   name: string;
 
   @ApiProperty()
-  @IsUrl({}, { message: 'Invalid URL format' })
+  @IsUrl({ require_tld: false }, { message: 'Invalid URL format' })
   @IsString()
   @IsOptional()
   imageUrl: URL;

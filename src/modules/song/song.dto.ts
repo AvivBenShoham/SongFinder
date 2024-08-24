@@ -30,7 +30,7 @@ export default class createSongReqDto {
   releaseDate: Date;
 
   @ApiProperty()
-  @IsUrl({}, { message: 'Invalid URL format' }) //TODO: IsUrl somewho is false positive, should be checked
+  @IsUrl({ require_tld: false }, { message: 'Invalid URL format' })
   @IsString()
   @IsOptional()
   coverUrl?: URL;
