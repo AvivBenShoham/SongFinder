@@ -42,7 +42,6 @@ export class SongController {
   @ApiCreatedResponse({ type: createSongSuccResponse })
   @ApiBadRequestResponse({ type: createSongBadRequest })
   async create(@Body() createSongDto: createSongReqDto) {
-    //TODO: add check that the song not already exists - based on song name and artist
     const isAlreadyExists =
       await this.songService.findSongByNameAndContributers(createSongDto);
     //TODO: add transactions

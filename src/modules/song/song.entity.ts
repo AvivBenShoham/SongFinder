@@ -22,7 +22,6 @@ export class Song {
   @Column({ type: 'varchar', length: 500, nullable: true, name: 'cover_url' })
   coverUrl: URL;
 
-  //TODO: need to understand how these relations work
   //TODO: fix primary column and shit like that
   @OneToMany(() => SongWord, (songWord) => songWord.word)
   lyrics: SongWord[];
