@@ -30,7 +30,7 @@ export default class createSongReqDto {
   releaseDate: Date;
 
   @ApiProperty()
-  @IsUrl({}, { message: 'Invalid URL format' })
+  @IsUrl({}, { message: 'Invalid URL format' }) //TODO: IsUrl somewho is false positive, should be checked
   @IsString()
   @IsOptional()
   coverUrl?: URL;
@@ -97,4 +97,11 @@ export class createSongBadRequest {
 
   @ApiProperty({ example: 'Bad Request' })
   error: string;
+}
+
+export class SongDto {
+  name: string;
+  album: string;
+  releaseDate: Date;
+  coverUrl: URL;
 }

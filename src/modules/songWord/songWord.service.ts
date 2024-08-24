@@ -3,6 +3,7 @@ import { Repository } from 'typeorm';
 import { SongWord } from './songWord.entity';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Song } from '../song/song.entity';
+import { SongWordOccurancies, songOccurancyDto } from './songWord.dto';
 
 @Injectable()
 export class SongWordService {
@@ -126,5 +127,43 @@ export class SongWordService {
       currRow++;
     });
     return songWords;
+  }
+
+  async findAllWithOccurrences(): Promise<SongWordOccurancies[]> {
+    const allSongWordsPopulated = await this.songWordRepository.find({
+      relations: ['song'],
+    });
+
+    // Initialize a map to hold the data
+    const wordMap = new Map<
+      string,
+      { word: string; songWords: songOccurancyDto[] }
+    >();
+    allSongWordsPopulated.forEach((songWord) => {
+      const word = songWord.word;
+      const songOcc = this.castSongWordToSongWordOccDto(songWord);
+      if (!wordMap.has(word)) {
+        wordMap.set(word, { word, songWords: [songOcc] });
+      } else {
+        wordMap.get(word).songWords.push(songOcc);
+      }
+    });
+
+    return Array.from(wordMap.values());
+  }
+
+  castSongWordToSongWordOccDto(songWord: SongWord): songOccurancyDto {
+    return {
+      col: songWord.col,
+      row: songWord.row,
+      stanza: songWord.stanza,
+      line: songWord.line,
+      song: {
+        name: songWord.song.name,
+        album: songWord.song.album,
+        coverUrl: songWord.song.coverUrl,
+        releaseDate: songWord.song.releaseDate,
+      },
+    };
   }
 }

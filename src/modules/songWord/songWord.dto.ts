@@ -1,4 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
+import { SongDto } from '../song/song.dto';
 
 export class lyricsSuccResponse {
   @ApiProperty({
@@ -25,4 +26,17 @@ export class lyricsSuccResponse {
     ],
   })
   lyrics: string[][];
+}
+
+export class songOccurancyDto {
+  song: SongDto;
+  row: number;
+  col: number;
+  stanza: number;
+  line: number;
+}
+
+export class SongWordOccurancies {
+  word: string;
+  songWords: songOccurancyDto[];
 }

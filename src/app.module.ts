@@ -25,6 +25,7 @@ import { SongWordService } from './modules/songWord/songWord.service';
 import { SongContributerService } from './modules/songContributer/songContributer.service';
 import { WordGroupService } from './modules/wordGroup/wordGroup.service';
 import { WordGroupController } from './modules/wordGroup/wordGroup.controller';
+import { WordController } from './modules/songWord/word.controller';
 
 //TODO: .env not getting imported
 
@@ -54,6 +55,7 @@ import { WordGroupController } from './modules/wordGroup/wordGroup.controller';
     HealthController,
     SongWordController,
     WordGroupController,
+    WordController,
   ],
   providers: [
     SongService,
