@@ -1,10 +1,4 @@
-import {
-  Entity,
-  Column,
-  PrimaryGeneratedColumn,
-  OneToMany,
-  PrimaryColumn,
-} from 'typeorm';
+import { Entity, Column, PrimaryGeneratedColumn, OneToMany } from 'typeorm';
 import { SongContributer } from '../songContributer/songContributer.entity';
 
 @Entity({ name: 'artists' })
@@ -12,7 +6,7 @@ export class Artist {
   @PrimaryGeneratedColumn()
   artistId: number;
 
-  @PrimaryColumn({ type: 'varchar', length: 255 })
+  @Column({ type: 'varchar', length: 255 })
   name: string;
 
   @Column({
@@ -31,6 +25,6 @@ export class Artist {
   })
   imageUrl: URL;
 
-  @OneToMany(() => SongContributer, (contributer) => contributer.artistId)
+  @OneToMany(() => SongContributer, (contributer) => contributer.artist)
   contributions: SongContributer[];
 }

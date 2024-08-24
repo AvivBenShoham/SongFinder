@@ -2,7 +2,6 @@ import { Injectable } from '@nestjs/common';
 import { In, Repository } from 'typeorm';
 import { Artist } from './artist.entity';
 import { InjectRepository } from '@nestjs/typeorm';
-import { ContributerType } from '../songContributer/songContribuer.dto';
 
 interface HasArtistName {
   artistName: string;
@@ -23,9 +22,9 @@ export class ArtistService {
     return this.artistRepository.findBy({ name });
   }
 
-  async addIdsByNames<T extends HasArtistName>(
+  async changeNamesToIds<T extends HasArtistName>(
     array: Array<T>,
-  ): Promise<Array<T>> {
+  ): Promise<Array<T & { artistId: number }>> {
     const artists = await this.artistRepository.find({
       where: {
         lowercasedName: In(array.map((object) => object.artistName)),
@@ -38,7 +37,12 @@ export class ArtistService {
     );
 
     return array.map((object) => {
-      return { ...object, artistId: nameToIdHash.get(object.artistName) };
+      const withAddId = {
+        ...object,
+        artistId: nameToIdHash.get(object.artistName),
+      };
+      delete withAddId.artistName;
+      return withAddId;
     });
   }
 

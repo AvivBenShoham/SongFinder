@@ -3,7 +3,9 @@ import {
   Column,
   PrimaryGeneratedColumn,
   ManyToOne,
-  ManyToMany,
+  JoinColumn,
+  PrimaryColumn,
+  Generated,
 } from 'typeorm';
 import { Song } from '../song/song.entity';
 import { Artist } from '../artist/artist.entity';
@@ -17,9 +19,17 @@ export class SongContributer {
   @Column({ type: 'enum', enum: ContributerType })
   type: ContributerType;
 
-  @ManyToMany(() => Artist, (artist) => artist.contributions)
+  @Column({ name: 'artist_id' })
   artistId: number;
 
-  // @ManyToOne(() => Song, (song) => song.contributers)
+  @ManyToOne(() => Artist, (artist) => artist.artistId)
+  @JoinColumn({ name: 'artist_id' })
+  artist: Artist;
+
+  @ManyToOne(() => Song, (song) => song.contributers)
+  @JoinColumn({ name: 'song_id' })
+  song: Song;
+
+  @Column({ name: 'song_id' })
   songId: number;
 }

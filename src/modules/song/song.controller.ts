@@ -10,7 +10,10 @@ import createSongReqDto from './song.dto';
 import { ApiBody } from '@nestjs/swagger';
 import { SongWordService } from '../songWord/songWord.service';
 import { ArtistService } from '../artist/artist.service';
-import { createContributerDto } from '../songContributer/songContribuer.dto';
+import addContributer, {
+  ContributerType,
+  createContributerDto,
+} from '../songContributer/songContribuer.dto';
 import { SongContributerService } from '../songContributer/songContributer.service';
 
 @Controller('songs')
@@ -30,32 +33,49 @@ export class SongController {
   @Post()
   @ApiBody({ type: createSongReqDto })
   async create(@Body() createSongDto: createSongReqDto) {
-    try {
-      //TODO: add check that the song not already exists - based on song name and artist
-      const isAllArtistsExists = await this.artistService.checkIfExists(
-        createSongDto.contributers.map((contribuer) => contribuer.artistName),
-      );
+    //TODO: add check that the song not already exists - based on song name and artist
+    const isAlreadyExists =
+      await this.songService.findSongByNameAndContributers(createSongDto);
+    //TODO: add transactions
+    if (isAlreadyExists)
+      throw new BadRequestException('the song already exists');
+    const isAllArtistsExists = await this.artistService.checkIfExists(
+      createSongDto.contributers.map((contribuer) => contribuer.artistName),
+    );
 
-      if (!isAllArtistsExists)
-        throw new BadRequestException('Not all artists exists');
+    if (!isAllArtistsExists)
+      throw new BadRequestException('Not all artists exists');
 
-      const { songId } = await this.songService.insert(createSongDto);
-      const contributers = (await this.artistService.addIdsByNames(
-        createSongDto.contributers,
-      )) as unknown as createContributerDto[];
+    const { songId } = await this.songService.insert(createSongDto);
 
+    const contributers = await this.createContributers(
+      createSongDto.contributers,
+      songId,
+    );
 
-      await this.contributerService.insertMany(contributers);
-      const songWords = this.songWordService.convertLyricsToSongWords(
-        createSongDto.lyrics,
-        songId,
-      );
+    const songWords = this.songWordService.convertLyricsToSongWords(
+      createSongDto.lyrics,
+      songId,
+    );
 
-      this.songWordService.insertMany(songWords);
-      // TODO: should I insert to the word table? why does that table exists anyway?
-      return { success: true };
-    } catch (err) {
-      console.error(err);
-    }
+    await this.songWordService.insertMany(songWords);
+    return { success: true, songId, contributers, songWords };
+  }
+
+  async createContributers(basicContributer: addContributer[], songId: number) {
+    const contributers = (await this.artistService.changeNamesToIds(
+      basicContributer,
+    )) as Array<{
+      artistId: number;
+      type: ContributerType;
+    }>;
+
+    const contributersToCreate: Array<createContributerDto> = contributers.map(
+      (contributer) => {
+        return { ...contributer, songId };
+      },
+    );
+
+    return await this.contributerService.insertMany(contributersToCreate);
   }
 }
