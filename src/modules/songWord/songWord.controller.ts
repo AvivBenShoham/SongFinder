@@ -11,4 +11,10 @@ export class SongWordController {
     const songWords = this.songWordService.findBySongId(id);
     return songWords;
   }
+
+  @Get('/search/:word')
+  async searchWord(@Param('word') word: string) {
+    const songWords = this.songWordService.getSongsByWord(word);
+    return songWords;
+  }
 }

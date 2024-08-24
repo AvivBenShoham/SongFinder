@@ -2,6 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { Repository } from 'typeorm';
 import { SongWord } from './songWord.entity';
 import { InjectRepository } from '@nestjs/typeorm';
+import { Song } from '../song/song.entity';
 
 @Injectable()
 export class SongWordService {
@@ -14,8 +15,8 @@ export class SongWordService {
     return this.songWordRepository.find();
   }
 
-  async findBySongId(songId: number): Promise<SongWord> {
-    return this.songWordRepository.findOneBy({ song: songId });
+  async findBySongId(songId: number): Promise<SongWord[]> {
+    return this.songWordRepository.findBy({ songId });
   }
 
   async findByName(word: string): Promise<SongWord[]> {
@@ -23,6 +24,16 @@ export class SongWordService {
       .createQueryBuilder('songWord')
       .where('word like :name', { name: `%${word}%` })
       .getMany();
+  }
+
+  async getSongsByWord(word: string): Promise<Song[]> {
+    const songWords = await this.songWordRepository.find({
+      where: { word },
+      relations: ['song'],
+    });
+
+    const songs = songWords.map((songWord) => songWord.song);
+    return songs;
   }
 
   // only for internal backend usage
@@ -56,7 +67,7 @@ export class SongWordService {
             stanza: currStanza,
             col: currColl,
             row: currRow,
-            song: songId,
+            songId: songId,
           };
           songWords.push(songWord);
           currColl++;
