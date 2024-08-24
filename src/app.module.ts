@@ -23,6 +23,8 @@ import { HealthModule } from './health/health.module';
 import { SongWordController } from './modules/songWord/songWord.controller';
 import { SongWordService } from './modules/songWord/songWord.service';
 import { SongContributerService } from './modules/songContributer/songContributer.service';
+import { WordGroupService } from './modules/wordGroup/wordGroup.service';
+import { WordGroupController } from './modules/wordGroup/wordGroup.controller';
 
 //TODO: .env not getting imported
 
@@ -51,6 +53,7 @@ import { SongContributerService } from './modules/songContributer/songContribute
     ArtistController,
     HealthController,
     SongWordController,
+    WordGroupController,
   ],
   providers: [
     SongService,
@@ -58,6 +61,7 @@ import { SongContributerService } from './modules/songContributer/songContribute
     ArtistService,
     SongWordService,
     SongContributerService,
+    WordGroupService,
   ],
 })
 export class AppModule {}
