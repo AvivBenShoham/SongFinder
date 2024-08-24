@@ -6,8 +6,15 @@ import {
   Post,
 } from '@nestjs/common';
 import { SongService } from './song.service';
-import createSongReqDto from './song.dto';
-import { ApiBody } from '@nestjs/swagger';
+import createSongReqDto, {
+  createSongBadRequest,
+  createSongSuccResponse,
+} from './song.dto';
+import {
+  ApiBadRequestResponse,
+  ApiBody,
+  ApiCreatedResponse,
+} from '@nestjs/swagger';
 import { SongWordService } from '../songWord/songWord.service';
 import { ArtistService } from '../artist/artist.service';
 import addContributer, {
@@ -32,6 +39,8 @@ export class SongController {
 
   @Post()
   @ApiBody({ type: createSongReqDto })
+  @ApiCreatedResponse({ type: createSongSuccResponse })
+  @ApiBadRequestResponse({ type: createSongBadRequest })
   async create(@Body() createSongDto: createSongReqDto) {
     //TODO: add check that the song not already exists - based on song name and artist
     const isAlreadyExists =

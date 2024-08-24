@@ -10,6 +10,8 @@ import {
   ValidateNested,
 } from 'class-validator';
 import { Type } from 'class-transformer';
+import { SongContributer } from '../songContributer/songContributer.entity';
+import { SongWord } from '../songWord/songWord.entity';
 
 export default class createSongReqDto {
   @ApiProperty()
@@ -51,4 +53,48 @@ export class createSongDto {
   album?: string;
   releaseDate: Date;
   coverUrl?: URL;
+}
+
+export class createSongSuccResponse {
+  @ApiProperty({ example: true })
+  success: boolean;
+  @ApiProperty({ example: 3 })
+  songId: number;
+  @ApiProperty({
+    example: [
+      {
+        type: 'producer',
+        artistId: 6,
+        songId: 3,
+        id: 4,
+      },
+    ],
+  })
+  contributers: SongContributer[];
+
+  @ApiProperty({
+    example: [
+      {
+        actualWord: 'string',
+        word: 'string',
+        line: 1,
+        stanza: 1,
+        col: 1,
+        row: 1,
+        songId: 3,
+      },
+    ],
+  })
+  songWords: SongWord[];
+}
+
+export class createSongBadRequest {
+  @ApiProperty({ example: 400 })
+  statusCode: number;
+
+  @ApiProperty({ example: 'The song already exists' })
+  message: string;
+
+  @ApiProperty({ example: 'Bad Request' })
+  error: string;
 }
