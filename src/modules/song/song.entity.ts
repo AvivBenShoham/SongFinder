@@ -23,9 +23,9 @@ export class Song {
   coverUrl: URL;
 
   //TODO: need to understand how these relations work
-
-  // @OneToMany(() => SongWord, (songWord) => songWord.word)
-  // lyrics: SongWord[];
+  //TODO: fix primary column and shit like that
+  @OneToMany(() => SongWord, (songWord) => songWord.word)
+  lyrics: SongWord[];
 
   @OneToMany(() => SongContributer, (contributer) => contributer.song)
   contributers: SongContributer[];

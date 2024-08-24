@@ -1,4 +1,10 @@
-import { Entity, Column, PrimaryGeneratedColumn, OneToMany } from 'typeorm';
+import {
+  Entity,
+  Column,
+  PrimaryGeneratedColumn,
+  OneToMany,
+  BeforeInsert,
+} from 'typeorm';
 import { SongContributer } from '../songContributer/songContributer.entity';
 
 @Entity({ name: 'artists' })
@@ -13,7 +19,7 @@ export class Artist {
     type: 'varchar',
     length: 255,
     name: 'lowercased_name',
-    unique: true,
+    unique: true, // because we need some identifier to identify artist when receiving a request
   })
   lowercasedName: string;
 
@@ -27,4 +33,9 @@ export class Artist {
 
   @OneToMany(() => SongContributer, (contributer) => contributer.artist)
   contributions: SongContributer[];
+
+  @BeforeInsert()
+  setLowercasedName() {
+    this.lowercasedName = this.name.toLowerCase();
+  }
 }

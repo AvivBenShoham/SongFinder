@@ -2,6 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { In, Repository } from 'typeorm';
 import { Artist } from './artist.entity';
 import { InjectRepository } from '@nestjs/typeorm';
+import { createArtistDto } from './artist.dto';
 
 interface HasArtistName {
   artistName: string;
@@ -14,6 +15,10 @@ export class ArtistService {
     private artistRepository: Repository<Artist>,
   ) {}
 
+  async insert(createArtistDto: createArtistDto) {
+    const newArtist = this.artistRepository.create(createArtistDto);
+    return this.artistRepository.save(newArtist);
+  }
   async findAll(): Promise<Artist[]> {
     return this.artistRepository.find();
   }
