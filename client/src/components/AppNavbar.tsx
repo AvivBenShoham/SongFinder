@@ -6,10 +6,7 @@ import Stack from "@mui/material/Stack";
 import MuiToolbar from "@mui/material/Toolbar";
 import { tabsClasses } from "@mui/material/Tabs";
 import Typography from "@mui/material/Typography";
-import MenuRoundedIcon from "@mui/icons-material/MenuRounded";
 import DashboardRoundedIcon from "@mui/icons-material/DashboardRounded";
-import SideMenuMobile from "./SideMenuMobile";
-import MenuButton from "./MenuButton";
 
 const Toolbar = styled(MuiToolbar)({
   width: "100%",
@@ -58,7 +55,7 @@ export default function AppNavbar() {
               component="h1"
               sx={{ color: "text.primary" }}
             >
-              Dashboard
+              SongFinder
             </Typography>
           </Stack>
         </Stack>

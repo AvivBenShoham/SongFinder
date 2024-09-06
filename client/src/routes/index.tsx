@@ -1,18 +1,14 @@
-import { createBrowserRouter, RouterProvider } from "react-router-dom";
+import { Routes, Route, Navigate, BrowserRouter } from "react-router-dom";
 import Root from "./Root";
 import MainGrid from "../components/MainGrid";
 
-const router = createBrowserRouter([
-  {
-    path: "/",
-    element: <Root />,
-    children: [
-      {
-        path: "/",
-        element: <MainGrid />,
-      },
-    ],
-  },
-]);
-
-export const AppRouter = () => <RouterProvider router={router} />;
+export const AppRouter = () => (
+  <BrowserRouter>
+    <Routes>
+      <Route path="/" element={<Root />}>
+        <Route path="home" element={<MainGrid />} />
+        <Route path="" element={<Navigate to="home" />} />
+      </Route>
+    </Routes>
+  </BrowserRouter>
+);

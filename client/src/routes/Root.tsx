@@ -15,7 +15,7 @@ import SideMenu from "../components/SideMenu";
 import { Outlet } from "react-router-dom";
 
 export default function Root() {
-  const [mode, setMode] = React.useState<PaletteMode>("light");
+  const [mode, setMode] = React.useState<PaletteMode>("dark");
   const dashboardTheme = createTheme(getDashboardTheme(mode));
 
   return (
