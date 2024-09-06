@@ -7,9 +7,7 @@ import type {} from "@mui/x-tree-view/themeAugmentation";
 import { getDesignTokens } from "./themePrimitives";
 import {
   chartsCustomizations,
-  dataGridCustomizations,
   datePickersCustomizations,
-  inputsCustomizations,
   dataDisplayCustomizations,
   feedbackCustomizations,
   navigationCustomizations,
@@ -21,10 +19,7 @@ export default function getDashboardTheme(mode: PaletteMode): ThemeOptions {
     ...getDesignTokens(mode),
     components: {
       ...chartsCustomizations,
-      ...dataGridCustomizations,
       ...datePickersCustomizations,
-      ...inputsCustomizations,
-      ...inputsCustomizations,
       ...dataDisplayCustomizations,
       ...feedbackCustomizations,
       ...navigationCustomizations,

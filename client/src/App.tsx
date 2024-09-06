@@ -11,7 +11,7 @@ import Stack from "@mui/material/Stack";
 import getDashboardTheme from "./theme/getDashboardTheme";
 import AppNavbar from "./components/AppNavbar";
 import Header from "./components/Header";
-import MainGrid from "./components/MainGrid";
+import MainGrid from "./routes/Home";
 import SideMenu from "./components/SideMenu";
 import { Outlet } from "react-router-dom";
 

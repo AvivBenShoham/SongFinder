@@ -4,6 +4,7 @@ import Typography from "@mui/material/Typography";
 import Breadcrumbs, { breadcrumbsClasses } from "@mui/material/Breadcrumbs";
 import NavigateNextRoundedIcon from "@mui/icons-material/NavigateNextRounded";
 import { useLocation } from "react-router-dom";
+import { AppRoutes } from "../routes";
 
 const StyledBreadcrumbs = styled(Breadcrumbs)(({ theme }) => ({
   margin: theme.spacing(1, 0),
@@ -29,7 +30,11 @@ export default function NavbarBreadcrumbs() {
         variant="body1"
         sx={{ color: "text.primary", fontWeight: 600 }}
       >
-        {location.pathname}
+        {
+          Object.entries(AppRoutes).find(([, route]) =>
+            location?.pathname?.includes(route?.path)
+          )[0]
+        }
       </Typography>
     </StyledBreadcrumbs>
   );

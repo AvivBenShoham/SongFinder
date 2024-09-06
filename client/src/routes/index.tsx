@@ -1,12 +1,41 @@
 import { Routes, Route, Navigate, BrowserRouter } from "react-router-dom";
 import Root from "./Root";
-import MainGrid from "../components/MainGrid";
+import Home from "./Home";
+import HomeRoundedIcon from "@mui/icons-material/HomeRounded";
+import AnalyticsRoundedIcon from "@mui/icons-material/AnalyticsRounded";
+import LayersOutlinedIcon from "@mui/icons-material/LayersOutlined";
+import FontDownloadRoundedIcon from "@mui/icons-material/FontDownloadRounded";
+
+export const AppRoutes = {
+  Home: {
+    path: "home",
+    icon: <HomeRoundedIcon />,
+    element: <Home />,
+  },
+  Words: {
+    path: "words",
+    icon: <FontDownloadRoundedIcon />,
+    element: <Home />,
+  },
+  Groups: {
+    path: "groups",
+    icon: <LayersOutlinedIcon />,
+    element: <Home />,
+  },
+  Statistics: {
+    path: "statistics",
+    icon: <AnalyticsRoundedIcon />,
+    element: <Home />,
+  },
+};
 
 export const AppRouter = () => (
   <BrowserRouter>
     <Routes>
       <Route path="/" element={<Root />}>
-        <Route path="home" element={<MainGrid />} />
+        {Object.values(AppRoutes).map((route) => (
+          <Route path={route.path} element={route.element} />
+        ))}
         <Route path="" element={<Navigate to="home" />} />
       </Route>
     </Routes>
