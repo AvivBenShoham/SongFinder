@@ -12,6 +12,9 @@ export interface CustomAutocompleteProps {
   label?: string;
   options?: any[];
   getOptionLabel?: (option: any) => string;
+  freeSolo?: boolean;
+  value?: any[];
+  onChange?: (event: Event, newValue: any) => void;
 }
 
 export default function CustomAutocomplete(props: CustomAutocompleteProps) {
@@ -23,6 +26,9 @@ export default function CustomAutocomplete(props: CustomAutocompleteProps) {
       getOptionLabel={props?.getOptionLabel || ((s) => s)}
       size="small"
       limitTags={2}
+      freeSolo={props?.freeSolo || false}
+      onChange={props?.onChange}
+      value={props?.value}
       renderOption={(props, option, { selected }) => {
         const { key, ...optionProps } = props;
 

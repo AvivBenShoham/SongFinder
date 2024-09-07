@@ -5,33 +5,39 @@ import CardContent from "@mui/material/CardContent";
 import CardMedia from "@mui/material/CardMedia";
 import Typography from "@mui/material/Typography";
 
-export default function MediaControlCard() {
+export default function SongCard({
+  name = "",
+  album = "",
+  releaseDate = "",
+  coverUrl = "",
+  artist = "",
+}) {
   return (
     <Card sx={{ display: "flex" }}>
       <Box sx={{ display: "flex", flexDirection: "column" }}>
-        <CardContent sx={{ flex: "1 0 auto", minWidth: 150 }}>
+        <CardContent sx={{ flex: "1 0 auto", width: 300 }}>
           <Typography component="div" variant="h5">
-            Song Name
+            {name}
           </Typography>
           <Typography
             variant="subtitle1"
             component="div"
             sx={{ color: "text.secondary" }}
           >
-            Artist
+            {artist || name.split("by").slice(-1)[0].trim()}
           </Typography>
           <Typography variant="body1" sx={{ color: "text.secondary" }}>
-            Album
+            {album}
           </Typography>
           <Typography variant="body1" sx={{ color: "text.secondary" }}>
-            Release Year
+            {releaseDate}
           </Typography>
         </CardContent>
       </Box>
       <CardMedia
         component="img"
-        sx={{ width: 120 }}
-        image="https://picsum.photos/120"
+        sx={{ width: 120, height: 120 }}
+        image={coverUrl}
         alt="album cover"
       />
     </Card>
