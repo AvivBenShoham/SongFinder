@@ -1,31 +1,50 @@
 import * as React from "react";
 import Grid from "@mui/material/Grid2";
-import Box from "@mui/material/Box";
 import Typography from "@mui/material/Typography";
-import StatCard from "../components/StatCard";
 import SongCard from "../components/SongCard";
 import Autocomplete from "../components/Autocomplete";
-import { Stack, TextField } from "@mui/material";
+import { Pagination, Stack } from "@mui/material";
 import { DatePicker, LocalizationProvider } from "@mui/x-date-pickers";
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import { useQuery } from "@tanstack/react-query";
 import httpClient from "../httpClient";
 import { useSearchParams } from "react-router-dom";
-import qs from "qs";
 import dayjs from "dayjs";
 
 export default function Home() {
   const [searchParams, setSearchParams] = useSearchParams();
+  const [page, setPage] = React.useState(1);
+  const [rowsPerPage, setRowsPerPage] = React.useState(12);
 
-  const { data: songs } = useQuery({
-    queryKey: ["songs"],
+  const {
+    data: { songs, totalPages },
+  } = useQuery({
+    queryKey: ["songs", searchParams.toString(), page, rowsPerPage],
     queryFn: async () =>
-      (await httpClient.get(`songs?${searchParams.toString()}`)).data,
-    initialData: [],
+      (
+        await httpClient.get(
+          `songs?page=${page}&pageSize=${rowsPerPage}&${searchParams.toString()}`
+        )
+      ).data,
+    initialData: { songs: [], totalPages: 1, total: 0 },
   });
 
   const handleSearchParamsChange = (key: string, value: any) => {
-    setSearchParams({ ...searchParams, [key]: value });
+    setPage(1);
+
+    setSearchParams((prev) => {
+      prev.delete(key);
+
+      if (value?.length >= 0) {
+        value.forEach((element: string) => {
+          prev.append(key, element);
+        });
+      } else if (value) {
+        prev.set(key, value);
+      }
+
+      return prev;
+    });
   };
 
   const getSearchParamValue = (key: string) => {
@@ -34,8 +53,22 @@ export default function Home() {
     return value;
   };
 
+  const handleChangePage = (
+    event: React.ChangeEvent<unknown>,
+    page: number
+  ) => {
+    setPage(page);
+  };
+
   return (
-    <Box sx={{ width: "100%", maxWidth: { sm: "100%", md: "1700px" } }}>
+    <Stack
+      sx={{
+        width: "100%",
+        height: "100%",
+        maxWidth: { sm: "100%", md: "1700px" },
+        overflow: "hidden",
+      }}
+    >
       <Typography component="h2" variant="h6" sx={{ mb: 2 }}>
         Overview
       </Typography>
@@ -78,17 +111,34 @@ export default function Home() {
         container
         spacing={2}
         columns={12}
-        sx={{ mb: (theme) => theme.spacing(2) }}
+        sx={{
+          mb: (theme) => theme.spacing(2),
+          flex: 1,
+          overflowY: "auto",
+        }}
       >
-        {songs.map((song) => (
-          <SongCard key={song.songid} {...song} />
-        ))}
-        {[].map((card, index) => (
-          <Grid key={index} size={{ xs: 12, sm: 6, lg: 3 }}>
-            <StatCard {...card} />
-          </Grid>
-        ))}
+        {songs.map(
+          (
+            song: JSX.IntrinsicAttributes & {
+              name?: string | undefined;
+              album?: string | undefined;
+              releaseDate?: string | undefined;
+              coverUrl?: string | undefined;
+              artist?: string | undefined;
+            }
+          ) => (
+            <SongCard key={song?.songId} {...song} />
+          )
+        )}
       </Grid>
-    </Box>
+      <Pagination
+        page={page}
+        count={totalPages}
+        color="primary"
+        onChange={handleChangePage}
+        showFirstButton
+        showLastButton
+      />
+    </Stack>
   );
 }

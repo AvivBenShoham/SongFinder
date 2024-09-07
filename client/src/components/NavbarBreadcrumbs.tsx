@@ -33,7 +33,7 @@ export default function NavbarBreadcrumbs() {
         {
           Object.entries(AppRoutes).find(([, route]) =>
             location?.pathname?.includes(route?.path)
-          )[0]
+          )?.[0]
         }
       </Typography>
     </StyledBreadcrumbs>

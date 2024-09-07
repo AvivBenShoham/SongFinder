@@ -13,16 +13,21 @@ export default function SongCard({
   artist = "",
 }) {
   return (
-    <Card sx={{ display: "flex" }}>
+    <Card sx={{ display: "flex", maxHeight: 160 }}>
       <Box sx={{ display: "flex", flexDirection: "column" }}>
         <CardContent sx={{ flex: "1 0 auto", width: 300 }}>
           <Typography component="div" variant="h5">
-            {name}
+            {name.split("by").slice(0, -1)[0].trim()}
           </Typography>
           <Typography
             variant="subtitle1"
             component="div"
-            sx={{ color: "text.secondary" }}
+            sx={{
+              color: "text.secondary",
+              whiteSpace: "nowrap",
+              overflow: "hidden",
+              textOverflow: "ellipsis",
+            }}
           >
             {artist || name.split("by").slice(-1)[0].trim()}
           </Typography>

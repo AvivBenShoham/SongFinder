@@ -25,7 +25,7 @@ export default function Root() {
     <ThemeProvider theme={dashboardTheme}>
       <QueryClientProvider client={queryClient}>
         <CssBaseline enableColorScheme />
-        <Box sx={{ display: "flex" }}>
+        <Box sx={{ display: "flex", height: "100%" }}>
           <SideMenu />
           <AppNavbar />
           <Box
@@ -41,8 +41,9 @@ export default function Root() {
               sx={{
                 alignItems: "center",
                 mx: 3,
-                pb: 10,
+                pb: 1,
                 mt: { xs: 8, md: 0 },
+                height: "100%",
               }}
             >
               <Header />
