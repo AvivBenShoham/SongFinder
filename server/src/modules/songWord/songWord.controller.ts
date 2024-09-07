@@ -1,13 +1,19 @@
-import { Controller, Get, Param } from '@nestjs/common';
+import { Controller, Get, Param, Query } from '@nestjs/common';
 import { SongWordService } from './songWord.service';
 import { PositiveNumberPipe } from 'src/customValidators/checkPositiveParam.pipe';
-import { ApiResponse, ApiTags } from '@nestjs/swagger';
+import { ApiQuery, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { lyricsSuccResponse } from './songWord.dto';
+import { GetSongWordsQueryParams } from './dtos';
 
 @Controller('lyrics')
 @ApiTags('lyrics')
 export class SongWordController {
   constructor(private readonly songWordService: SongWordService) {}
+
+  @Get('/count')
+  async countUniqueSongWords() {
+    return this.songWordService.countUniqueSongWords();
+  }
 
   @Get('/:songId')
   @ApiResponse({ type: lyricsSuccResponse })
@@ -20,5 +26,12 @@ export class SongWordController {
   async searchWord(@Param('word') word: string) {
     const songWords = this.songWordService.getSongsByWord(word);
     return songWords;
+  }
+
+  @Get('/')
+  @ApiQuery({ name: 'page', type: Number, required: false })
+  @ApiQuery({ name: 'pageSize', type: Number, required: false })
+  async findSongWords(@Query() query: GetSongWordsQueryParams) {
+    return this.songWordService.findSongWords(query);
   }
 }

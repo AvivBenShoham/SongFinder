@@ -26,15 +26,7 @@ import addContributer, {
 import { SongContributerService } from '../songContributer/songContributer.service';
 import { getSongById } from 'genius-lyrics-api';
 import { Song } from './song.entity';
-
-export type GetSongsQueryParams = {
-  page?: string;
-  pageSize?: string;
-  words?: string | string[];
-  albums?: string | string[];
-  artists?: string | string[];
-  date?: Date;
-};
+import { GetSongsQueryParams } from './dtos';
 
 @Controller('songs')
 @ApiTags('songs')
@@ -55,7 +47,7 @@ export class SongController {
       total,
       page: query.page,
       pageSize: query.pageSize,
-      totalPages: Math.ceil(total / Number(query.pageSize)),
+      totalPages: Math.ceil(total / query.pageSize),
     };
   }
 
@@ -114,12 +106,12 @@ export class SongController {
   public async seed() {
     const options = {
       apiKey:
-        'weNnR0Cw1-GvnghbVKCk94SBClElAakGeHnc9Q7vnTto4hQP7a_TA8y7-29oPHHM',
+        'kN3y5VcTL7u0dpKKaBN61aDjJvGUuQIcv-goEsxzL6FZzQqgG7pfoRspNMaTslL7',
     };
 
-    const arr = new Array(1000)
+    const arr = new Array(300)
       .fill(0)
-      .map((_, i) => i + Math.floor(Math.random() * 100000));
+      .map((_, i) => Math.floor(Math.random() * 9999999));
 
     const songs = (
       await Promise.allSettled(
@@ -142,7 +134,7 @@ export class SongController {
         (promiseResult: PromiseFulfilledResult<any>) => promiseResult?.value,
       );
 
-    console.log('GOT ALL SONGS: ', songs.length);
+    console.log('GOT SONGS: ', songs.length);
 
     const songsDtos = (
       await Promise.allSettled(

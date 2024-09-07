@@ -127,7 +127,7 @@ export default function Home() {
               artist?: string | undefined;
             }
           ) => (
-            <SongCard key={song?.songId} {...song} />
+            <SongCard key={song?.id} {...song} />
           )
         )}
       </Grid>

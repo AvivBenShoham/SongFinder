@@ -1,4 +1,4 @@
-import { Entity, PrimaryColumn, JoinColumn } from 'typeorm';
+import { Entity, PrimaryColumn, JoinColumn, ManyToOne } from 'typeorm';
 import { Song } from '../song/song.entity';
 
 @Entity({ name: 'song_phrases' })
@@ -10,7 +10,7 @@ export class SongPhrase {
   actualPhrase: string;
 
   @PrimaryColumn({ type: 'int' })
-  @JoinColumn({ name: 'songId' })
+  @ManyToOne(() => Song, (song) => song.id)
   song: Song;
 
   @PrimaryColumn({ type: 'int' })

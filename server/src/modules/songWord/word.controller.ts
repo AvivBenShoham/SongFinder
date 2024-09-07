@@ -10,9 +10,4 @@ export class WordController {
     const songWords = await this.songWordService.findAllWithOccurrences();
     return songWords;
   }
-
-  @Get('/')
-  async findAll() {
-    return this.songWordService.findAll();
-  }
 }

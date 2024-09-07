@@ -19,7 +19,7 @@ export class SongContributerService {
     return this.songContribuerRepository.find({
       where: {
         song: {
-          songId,
+          id: songId,
         },
       },
     });
