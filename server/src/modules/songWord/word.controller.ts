@@ -6,8 +6,13 @@ export class WordController {
   constructor(private readonly songWordService: SongWordService) {}
 
   @Get('/allWithOccurrences')
-  async findAll() {
+  async findAllWithOccurrences() {
     const songWords = await this.songWordService.findAllWithOccurrences();
     return songWords;
+  }
+
+  @Get('/')
+  async findAll() {
+    return this.songWordService.findAll();
   }
 }

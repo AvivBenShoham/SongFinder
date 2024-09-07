@@ -16,7 +16,13 @@ export class SongContributerService {
   }
 
   async findAllBySongId(songId: number): Promise<SongContributer[]> {
-    return this.songContribuerRepository.findBy({ songId });
+    return this.songContribuerRepository.find({
+      where: {
+        song: {
+          songId,
+        },
+      },
+    });
   }
 
   async insertMany(

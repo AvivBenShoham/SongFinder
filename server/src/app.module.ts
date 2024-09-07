@@ -11,21 +11,14 @@ import {
   WordGroup,
   Artist,
 } from './imports/entities';
-import { SongController } from './modules/song/song.controller';
-import { ArtistController } from './modules/artist/artist.controller';
-import { AppController } from './app.controller';
-import { ArtistService } from './modules/artist/artist.service';
-import { AppService } from './app.service';
-import { SongService } from './modules/song/song.service';
-import { HealthController } from './health/health.controller';
 import { TerminusModule } from '@nestjs/terminus';
 import { HealthModule } from './health/health.module';
-import { SongWordController } from './modules/songWord/songWord.controller';
-import { SongWordService } from './modules/songWord/songWord.service';
-import { SongContributerService } from './modules/songContributer/songContributer.service';
-import { WordGroupService } from './modules/wordGroup/wordGroup.service';
-import { WordGroupController } from './modules/wordGroup/wordGroup.controller';
-import { WordController } from './modules/songWord/word.controller';
+import { SongModule } from './modules/song/song.module';
+import { ArtistModule } from './modules/artist/artist.module';
+import { SongWordModule } from './modules/songWord/songWord.module';
+import { WordGroupModule } from './modules/wordGroup/wordGroup.module';
+import { SongContributerModule } from './modules/songContributer/songContributer.module';
+import { DataSource } from 'typeorm';
 
 //TODO: .env not getting imported
 
@@ -47,23 +40,17 @@ import { WordController } from './modules/songWord/word.controller';
     TypeOrmModule.forRoot(databaseConfig()),
     TerminusModule.forRoot({}),
     HealthModule,
-  ],
-  controllers: [
-    SongController,
-    AppController,
-    ArtistController,
-    HealthController,
-    SongWordController,
-    WordGroupController,
-    WordController,
-  ],
-  providers: [
-    SongService,
-    AppService,
-    ArtistService,
-    SongWordService,
-    SongContributerService,
-    WordGroupService,
+    SongModule,
+    ArtistModule,
+    HealthModule,
+    SongWordModule,
+    WordGroupModule,
+    SongContributerModule,
+    SongModule,
   ],
 })
-export class AppModule {}
+export class AppModule {
+  constructor(private dataSource: DataSource) {
+    // dataSource.dropDatabase().then(() => console.log('DB-DROP'));
+  }
+}

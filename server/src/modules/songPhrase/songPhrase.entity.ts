@@ -3,10 +3,10 @@ import { Song } from '../song/song.entity';
 
 @Entity({ name: 'song_phrases' })
 export class SongPhrase {
-  @PrimaryColumn({ type: 'varchar', length: 100 })
+  @PrimaryColumn({ type: 'varchar', length: 200 })
   phrase: string;
 
-  @PrimaryColumn({ type: 'varchar', length: 100 })
+  @PrimaryColumn({ type: 'varchar', length: 200 })
   actualPhrase: string;
 
   @PrimaryColumn({ type: 'int' })

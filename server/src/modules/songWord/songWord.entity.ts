@@ -10,12 +10,7 @@ export class SongWord {
   actualWord: string;
 
   @ManyToOne(() => Song, (song) => song.songId)
-  @JoinColumn({ name: 'songId' })
-  song?: Song;
-
-  @PrimaryColumn({ type: 'int' })
-  @Column({ name: 'songId' })
-  songId: number;
+  song: Song;
 
   @PrimaryColumn({ type: 'int' })
   row: number;

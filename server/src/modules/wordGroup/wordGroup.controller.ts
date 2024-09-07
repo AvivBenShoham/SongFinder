@@ -9,8 +9,10 @@ import {
 } from '@nestjs/common';
 import { WordGroupService } from './wordGroup.service';
 import { createNewGroupName } from './wordGroup.dto';
+import { ApiTags } from '@nestjs/swagger';
 
-@Controller('wordGroup')
+@Controller('wordGroups')
+@ApiTags('wordGroups')
 export class WordGroupController {
   constructor(private readonly wordGroupService: WordGroupService) {}
   //TODO: think if we want to support creating an empty wordGroup (and if so, how?)

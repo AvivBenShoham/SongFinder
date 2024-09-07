@@ -1,10 +1,11 @@
 import { Controller, Get, Param } from '@nestjs/common';
 import { SongWordService } from './songWord.service';
 import { PositiveNumberPipe } from 'src/customValidators/checkPositiveParam.pipe';
-import { ApiResponse } from '@nestjs/swagger';
+import { ApiResponse, ApiTags } from '@nestjs/swagger';
 import { lyricsSuccResponse } from './songWord.dto';
 
 @Controller('lyrics')
+@ApiTags('lyrics')
 export class SongWordController {
   constructor(private readonly songWordService: SongWordService) {}
 

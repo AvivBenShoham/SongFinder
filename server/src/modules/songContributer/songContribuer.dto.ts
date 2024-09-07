@@ -2,6 +2,7 @@ import { ApiProperty } from '@nestjs/swagger';
 import { Artist } from '../artist/artist.entity';
 import { IsEnum, IsNotEmpty, IsString } from 'class-validator';
 import { Transform } from 'class-transformer';
+import { Song } from '../song/song.entity';
 
 export enum ContributerType {
   PRODUCER = 'producer',
@@ -26,5 +27,5 @@ export default class addContributer {
 export class createContributerDto {
   type: ContributerType;
   artistId: number;
-  songId: number;
+  song: Song;
 }

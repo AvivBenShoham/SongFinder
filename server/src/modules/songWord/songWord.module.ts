@@ -11,4 +11,4 @@ import { WordController } from './word.controller';
   providers: [SongWordService],
   exports: [SongWordService],
 })
-export class SongModule {}
+export class SongWordModule {}

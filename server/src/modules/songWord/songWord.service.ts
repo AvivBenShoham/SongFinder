@@ -4,6 +4,7 @@ import { SongWord } from './songWord.entity';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Song } from '../song/song.entity';
 import { SongWordOccurancies, songOccurancyDto } from './songWord.dto';
+import { formatText } from 'src/utils';
 
 @Injectable()
 export class SongWordService {
@@ -13,11 +14,21 @@ export class SongWordService {
   ) {}
 
   async findAll(): Promise<SongWord[]> {
-    return this.songWordRepository.find();
+    return (
+      await this.songWordRepository
+        .createQueryBuilder('song_words')
+        .select('DISTINCT song_words.word')
+        .take(1000)
+        .getRawMany()
+    ).map(({ word }) => word);
   }
 
   async findBySongId(songId: number): Promise<SongWord[]> {
-    return this.songWordRepository.findBy({ songId });
+    return this.songWordRepository.find({
+      where: {
+        song: { songId },
+      },
+    });
   }
 
   async findByName(word: string): Promise<SongWord[]> {
@@ -96,7 +107,7 @@ export class SongWordService {
     return stanzas;
   }
 
-  convertLyricsToSongWords(lyrics: string, songId: number): SongWord[] {
+  convertLyricsToSongWords(lyrics: string, song: Song): SongWord[] {
     const songWords: SongWord[] = [];
     let currLine = 1;
     let currRow = 1;
@@ -111,12 +122,12 @@ export class SongWordService {
         line.split(' ').forEach((word) => {
           const songWord: SongWord = {
             actualWord: word,
-            word: word.toLocaleLowerCase(),
+            word: formatText(word),
             line: currLine,
             stanza: currStanza,
             col: currColl,
             row: currRow,
-            songId: songId,
+            song,
           };
           songWords.push(songWord);
           currColl++;

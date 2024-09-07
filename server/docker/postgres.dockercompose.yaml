@@ -10,11 +10,11 @@ services:
     environment:
       - POSTGRES_PASSWORD=amitandaviv
       - POSTGRES_USER=songfinder
-      - POSTGRES_DB=song_finder
+      - POSTGRES_DB=v
   pgAdmin:
     image: dpage/pgadmin4
     ports:
-      - "8888:80"
+      - '8888:80'
     volumes:
       - ~/app/pgadmin-data:/var/lib/pgadmin
     environment:

@@ -1,4 +1,10 @@
-import { Entity, Column, PrimaryGeneratedColumn, OneToMany } from 'typeorm';
+import {
+  Entity,
+  Column,
+  PrimaryGeneratedColumn,
+  OneToMany,
+  JoinColumn,
+} from 'typeorm';
 import { SongContributer } from '../songContributer/songContributer.entity';
 import { SongWord } from '../songWord/songWord.entity';
 
@@ -7,10 +13,10 @@ export class Song {
   @PrimaryGeneratedColumn()
   songId: number;
 
-  @Column({ type: 'varchar', length: 50 })
+  @Column({ type: 'varchar', length: 200 })
   name: string;
 
-  @Column({ type: 'varchar', length: 50, nullable: true })
+  @Column({ type: 'varchar', length: 200, nullable: true })
   album: string;
 
   @Column({ type: 'date', name: 'release_date' })
@@ -22,8 +28,7 @@ export class Song {
   @Column({ type: 'varchar', length: 500, nullable: true, name: 'cover_url' })
   coverUrl: URL;
 
-  //TODO: fix primary column and shit like that
-  @OneToMany(() => SongWord, (songWord) => songWord.word)
+  @OneToMany(() => SongWord, (songWord) => songWord.song)
   lyrics: SongWord[];
 
   @OneToMany(() => SongContributer, (contributer) => contributer.song)

@@ -6,6 +6,7 @@ import {
   BeforeInsert,
 } from 'typeorm';
 import { SongContributer } from '../songContributer/songContributer.entity';
+import { formatText } from 'src/utils';
 
 @Entity({ name: 'artists' })
 export class Artist {
@@ -36,6 +37,6 @@ export class Artist {
 
   @BeforeInsert()
   setLowercasedName() {
-    this.lowercasedName = this.name.toLowerCase();
+    this.lowercasedName = formatText(this.name);
   }
 }

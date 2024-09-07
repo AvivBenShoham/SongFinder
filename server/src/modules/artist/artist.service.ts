@@ -3,6 +3,7 @@ import { In, Repository } from 'typeorm';
 import { Artist } from './artist.entity';
 import { InjectRepository } from '@nestjs/typeorm';
 import { createArtistDto } from './artist.dto';
+import { formatText } from 'src/utils';
 
 interface HasArtistName {
   artistName: string;
@@ -16,9 +17,16 @@ export class ArtistService {
   ) {}
 
   async insert(createArtistDto: createArtistDto) {
+    const exists = await this.findByName(createArtistDto.name);
+
+    if (exists.length > 0) {
+      return;
+    }
+
     const newArtist = this.artistRepository.create(createArtistDto);
     return this.artistRepository.save(newArtist);
   }
+
   async findAll(): Promise<Artist[]> {
     return this.artistRepository.find();
   }
@@ -32,11 +40,14 @@ export class ArtistService {
   ): Promise<Array<T & { artistId: number }>> {
     const artists = await this.artistRepository.find({
       where: {
-        lowercasedName: In(array.map((object) => object.artistName)),
+        lowercasedName: In(
+          array.map((object) => formatText(object.artistName)),
+        ),
       },
     });
 
     const nameToIdHash = new Map();
+
     artists.map(({ lowercasedName, artistId }) =>
       nameToIdHash.set(lowercasedName, artistId),
     );
@@ -44,21 +55,31 @@ export class ArtistService {
     return array.map((object) => {
       const withAddId = {
         ...object,
-        artistId: nameToIdHash.get(object.artistName),
+        artistId: nameToIdHash.get(formatText(object.artistName)),
       };
+
       delete withAddId.artistName;
+
       return withAddId;
     });
   }
 
   // works according to the assumption that each artists has a unique name
   async checkIfExists(names: string[]): Promise<boolean> {
+    const lowerCasedNames = names.map(formatText);
+
     const artists = await this.artistRepository.find({
       where: {
-        lowercasedName: In(names),
+        lowercasedName: In(lowerCasedNames),
       },
     });
 
-    return artists.length === names.length;
+    const artistsLowerCasedNames = artists.map(
+      (artist) => artist.lowercasedName,
+    );
+
+    return lowerCasedNames.every((name) =>
+      artistsLowerCasedNames.includes(name),
+    );
   }
 }
