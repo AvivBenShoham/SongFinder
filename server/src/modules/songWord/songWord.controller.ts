@@ -11,8 +11,8 @@ export class SongWordController {
   constructor(private readonly songWordService: SongWordService) {}
 
   @Get('/count')
-  async countUniqueSongWords() {
-    return this.songWordService.countUniqueSongWords();
+  async countSongWords(@Query() query: GetSongWordsQueryParams) {
+    return this.songWordService.countSongWords(query);
   }
 
   @Get('/:songId')

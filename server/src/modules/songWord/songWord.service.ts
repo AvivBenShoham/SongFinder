@@ -14,15 +14,7 @@ export class SongWordService {
     private songWordRepository: Repository<SongWord>,
   ) {}
 
-  async countUniqueSongWords() {
-    return this.songWordRepository
-      .createQueryBuilder('song_word')
-      .select('DISTINCT song_word.song')
-      .where('song_word.word != :emptyString', { emptyString: '' })
-      .getCount();
-  }
-
-  async findSongWords(query: GetSongWordsQueryParams) {
+  private async buildSongWordsQuery(query: GetSongWordsQueryParams) {
     const songs = getQueryParamList(query.songs).map(formatText);
 
     const queryBuilder = this.songWordRepository
@@ -61,7 +53,15 @@ export class SongWordService {
         .take(query.pageSize);
     }
 
-    return queryBuilder.getRawMany();
+    return queryBuilder;
+  }
+
+  async countSongWords(query: GetSongWordsQueryParams) {
+    return (await this.buildSongWordsQuery(query)).getCount();
+  }
+
+  async findSongWords(query: GetSongWordsQueryParams) {
+    return (await this.buildSongWordsQuery(query)).getRawMany();
   }
 
   async findBySongId(id: number): Promise<SongWord[]> {

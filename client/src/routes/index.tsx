@@ -1,6 +1,7 @@
 import { Routes, Route, Navigate, BrowserRouter } from "react-router-dom";
 import Root from "./Root";
 import Home from "./Home";
+import Words from "./Words";
 import HomeRoundedIcon from "@mui/icons-material/HomeRounded";
 import AnalyticsRoundedIcon from "@mui/icons-material/AnalyticsRounded";
 import LayersOutlinedIcon from "@mui/icons-material/LayersOutlined";
@@ -15,7 +16,7 @@ export const AppRoutes = {
   Words: {
     path: "words",
     icon: <FontDownloadRoundedIcon />,
-    element: <Home />,
+    element: <Words />,
   },
   Groups: {
     path: "groups",
