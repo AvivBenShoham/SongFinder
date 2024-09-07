@@ -117,7 +117,7 @@ export class SongController {
         'weNnR0Cw1-GvnghbVKCk94SBClElAakGeHnc9Q7vnTto4hQP7a_TA8y7-29oPHHM',
     };
 
-    const arr = new Array(100)
+    const arr = new Array(1000)
       .fill(0)
       .map((_, i) => i + Math.floor(Math.random() * 100000));
 
@@ -172,9 +172,7 @@ export class SongController {
                 imageUrl: artist.image_url,
               }),
             ),
-          ).then((res) => {
-            console.log('SEED ARTISTS RESULT:', res);
-          });
+          );
 
           return {
             name: songData.title,
@@ -201,5 +199,7 @@ export class SongController {
     await Promise.allSettled(
       songsDtos.map(async (songDto) => this.create(songDto)),
     );
+
+    console.log('SEED FINISHED');
   }
 }
