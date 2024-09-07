@@ -13,15 +13,12 @@ export class GetSongsQueryParams {
   pageSize?: number;
 
   @IsOptional()
-  @IsString()
   words?: string | string[];
 
   @IsOptional()
-  @IsString()
   albums?: string | string[];
 
   @IsOptional()
-  @IsString()
   artists?: string | string[];
 
   @IsOptional()
