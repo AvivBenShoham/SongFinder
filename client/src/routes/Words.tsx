@@ -1,33 +1,46 @@
 import * as React from "react";
 import Grid from "@mui/material/Grid2";
 import Typography from "@mui/material/Typography";
-import SongCard from "../components/SongCard";
 import Autocomplete from "../components/Autocomplete";
 import { Pagination, Stack } from "@mui/material";
-import { DatePicker, LocalizationProvider } from "@mui/x-date-pickers";
-import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import { useQuery } from "@tanstack/react-query";
 import httpClient from "../httpClient";
 import { useNavigate, useSearchParams } from "react-router-dom";
-import dayjs from "dayjs";
+import SongWordCard from "../components/SongWordCard";
 
-export default function Home() {
+export interface SongWordResult {
+  word: string;
+  documents: {
+    stanza: number;
+    line: number;
+    row: number;
+    col: number;
+    songId: number;
+  }[];
+}
+
+export default function Words() {
   const [searchParams, setSearchParams] = useSearchParams();
   const [page, setPage] = React.useState(1);
-  const [rowsPerPage, setRowsPerPage] = React.useState(12);
+  const [rowsPerPage, setRowsPerPage] = React.useState(4);
   const navigate = useNavigate();
 
-  const {
-    data: { songs, totalPages },
-  } = useQuery({
-    queryKey: ["songs", searchParams.toString(), page, rowsPerPage],
+  const { data: wordsCount } = useQuery({
+    queryKey: ["words", "count", searchParams.toString()],
+    queryFn: async () =>
+      (await httpClient.get(`lyrics/count?${searchParams.toString()}`)).data,
+    initialData: 0,
+  });
+
+  const { data: words } = useQuery({
+    queryKey: ["words", searchParams.toString(), page, rowsPerPage],
     queryFn: async () =>
       (
         await httpClient.get(
-          `songs?page=${page}&pageSize=${rowsPerPage}&${searchParams.toString()}`
+          `lyrics?page=${page}&pageSize=${rowsPerPage}&${searchParams.toString()}`
         )
-      ).data,
-    initialData: { songs: [], totalPages: 1, total: 0 },
+      ).data as SongWordResult[],
+    initialData: [],
   });
 
   const handleSearchParamsChange = (key: string, value: any) => {
@@ -75,38 +88,21 @@ export default function Home() {
       </Typography>
       <Stack direction="row" spacing={1} marginY={2}>
         <Autocomplete
-          label="Filter words"
+          label="Filter songs"
           freeSolo
-          value={searchParams.getAll("words")}
+          value={searchParams.getAll("songs")}
           onChange={(_, newValue) =>
-            handleSearchParamsChange("words", newValue)
+            handleSearchParamsChange("songs", newValue)
           }
         />
         <Autocomplete
-          label="Filter albums"
+          label="Filter groups"
           freeSolo
-          value={searchParams.getAll("albums")}
+          value={searchParams.getAll("groups")}
           onChange={(_, newValue) =>
-            handleSearchParamsChange("albums", newValue)
+            handleSearchParamsChange("groups", newValue)
           }
         />
-        <Autocomplete
-          label="Filter artists"
-          freeSolo
-          value={searchParams.getAll("artists")}
-          onChange={(_, newValue) =>
-            handleSearchParamsChange("artists", newValue)
-          }
-        />
-        <LocalizationProvider dateAdapter={AdapterDayjs}>
-          <DatePicker
-            label="Filter by date"
-            slotProps={{ textField: { size: "small" } }}
-            sx={{ minWidth: 200 }}
-            value={dayjs(getSearchParamValue("date") || new Date())}
-            onChange={(newValue) => handleSearchParamsChange("date", newValue)}
-          />
-        </LocalizationProvider>{" "}
       </Stack>
       <Grid
         container
@@ -118,29 +114,19 @@ export default function Home() {
           overflowY: "auto",
         }}
       >
-        {songs.map(
-          (
-            song: JSX.IntrinsicAttributes & {
-              name?: string | undefined;
-              album?: string | undefined;
-              releaseDate?: string | undefined;
-              coverUrl?: string | undefined;
-              artist?: string | undefined;
-            }
-          ) => (
-            <SongCard
-              key={song?.id}
-              {...song}
-              onClick={() => {
-                navigate(`/lyrics/${song?.id}`);
-              }}
-            />
-          )
-        )}
+        {words.map((songWord) => (
+          <SongWordCard
+            key={songWord.word}
+            {...songWord}
+            onClick={(wordDoc) => {
+              navigate(`/lyrics/${wordDoc.songId}`);
+            }}
+          />
+        ))}
       </Grid>
       <Pagination
         page={page}
-        count={totalPages}
+        count={Math.ceil(wordsCount / rowsPerPage)}
         color="primary"
         onChange={handleChangePage}
         showFirstButton

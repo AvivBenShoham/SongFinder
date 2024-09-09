@@ -9,7 +9,7 @@ export class SongWord {
   @PrimaryColumn({ type: 'varchar', length: 30, name: 'actual_word' })
   actualWord: string;
 
-  @ManyToOne(() => Song, (song) => song.songId)
+  @ManyToOne(() => Song, (song) => song.id)
   song: Song;
 
   @PrimaryColumn({ type: 'int' })

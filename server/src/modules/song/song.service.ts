@@ -3,8 +3,8 @@ import { In, Repository, MoreThanOrEqual, SelectQueryBuilder } from 'typeorm';
 import { Song } from './song.entity';
 import { InjectRepository } from '@nestjs/typeorm';
 import createSongReqDto, { createSongDto } from './song.dto';
-import { GetSongsQueryParams } from './song.controller';
-import { formatText } from 'src/utils';
+import { formatText, getQueryParamList } from 'src/utils';
+import { GetSongsQueryParams } from './dtos';
 
 @Injectable()
 export class SongService {
@@ -16,31 +16,24 @@ export class SongService {
   private buildPaginationQuery(
     query: GetSongsQueryParams,
   ): SelectQueryBuilder<Song> {
-    const getQueryParamList = (key: string) =>
-      query[key]
-        ? typeof query[key] === 'string'
-          ? [query[key]]
-          : query[key]
-        : [];
+    const words = getQueryParamList(query?.words).map(formatText);
+    const albums = getQueryParamList(query?.albums);
+    const artists = getQueryParamList(query?.artists).map(formatText);
 
-    const words = getQueryParamList('words').map(formatText);
-    const albums = getQueryParamList('albums');
-    const artists = getQueryParamList('artists').map(formatText);
-
-    let baseQuery = this.songRepository.createQueryBuilder('song');
+    const queryBuilder = this.songRepository.createQueryBuilder('song');
 
     if (words.length > 0) {
-      baseQuery = baseQuery
+      queryBuilder
         .innerJoinAndSelect('song.lyrics', 'song_words')
         .andWhere('song_words.word IN (:...words)', { words });
     }
 
     if (albums.length > 0) {
-      baseQuery = baseQuery.where('song.album IN (:...albums)', { albums });
+      queryBuilder.where('song.album IN (:...albums)', { albums });
     }
 
     if (artists.length > 0) {
-      baseQuery = baseQuery
+      queryBuilder
         .innerJoinAndSelect('song.contributers', 'song_contributers')
         .innerJoinAndSelect('song_contributers.artist', 'artists')
         .andWhere('artists.lowercasedName IN (:...artists)', {
@@ -49,26 +42,27 @@ export class SongService {
     }
 
     if (query.date) {
-      baseQuery = baseQuery.andWhere('song.release_date >= :releaseDate', {
+      queryBuilder.andWhere('song.release_date >= :releaseDate', {
         releaseDate: query.date,
       });
     }
 
     if (query.page && query.pageSize) {
-      const page = Number(query.page);
-      const pageSize = Number(query.pageSize);
-
-      baseQuery = baseQuery
+      queryBuilder
         .orderBy('song.releaseDate')
-        .skip((page - 1) * pageSize)
-        .take(pageSize);
+        .skip((query.page - 1) * query.pageSize)
+        .take(query.pageSize);
     }
 
-    return baseQuery;
+    return queryBuilder;
   }
 
   async findAll(query: GetSongsQueryParams) {
     return this.buildPaginationQuery(query).getManyAndCount();
+  }
+
+  async findOne(songId: number): Promise<Song> {
+    return this.songRepository.findOneBy({ id: songId });
   }
 
   async findByName(songName: string): Promise<Song[]> {

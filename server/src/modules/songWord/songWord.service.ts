@@ -4,7 +4,8 @@ import { SongWord } from './songWord.entity';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Song } from '../song/song.entity';
 import { SongWordOccurancies, songOccurancyDto } from './songWord.dto';
-import { formatText } from 'src/utils';
+import { formatText, getQueryParamList } from 'src/utils';
+import { GetSongWordsQueryParams } from './dtos';
 
 @Injectable()
 export class SongWordService {
@@ -13,20 +14,60 @@ export class SongWordService {
     private songWordRepository: Repository<SongWord>,
   ) {}
 
-  async findAll(): Promise<SongWord[]> {
-    return (
-      await this.songWordRepository
-        .createQueryBuilder('song_words')
-        .select('DISTINCT song_words.word')
-        .take(1000)
-        .getRawMany()
-    ).map(({ word }) => word);
+  private async buildSongWordsQuery(query: GetSongWordsQueryParams) {
+    const songs = getQueryParamList(query.songs).map(formatText);
+
+    const queryBuilder = this.songWordRepository
+      .createQueryBuilder('song_word')
+      .select('song_word.word', 'word')
+      .where("song_word.word ~* '^[a-z]+$'")
+      .andWhere("song_word.word NOT IN ('a', 'an', 'the')");
+
+    if (songs.length > 0) {
+      queryBuilder.andWhere('song_word.song IN (:...songs)', { songs });
+    }
+
+    const positions = {
+      col: query.col,
+      row: query.row,
+      stanza: query.stanza,
+      line: query.line,
+    };
+
+    Object.entries(positions).forEach(([key, value]) => {
+      if (value) {
+        queryBuilder.andWhere(`song_word.${key} = :${key}`, {
+          [key]: value,
+        });
+      }
+    });
+
+    queryBuilder
+      .addSelect(`JSON_AGG(song_word)`, 'documents')
+      .groupBy('song_word.word');
+
+    if (query.page && query.pageSize) {
+      queryBuilder
+        .orderBy('song_word.word')
+        .skip((query.page - 1) * query.pageSize)
+        .take(query.pageSize);
+    }
+
+    return queryBuilder;
   }
 
-  async findBySongId(songId: number): Promise<SongWord[]> {
+  async countSongWords(query: GetSongWordsQueryParams) {
+    return (await this.buildSongWordsQuery(query)).getCount();
+  }
+
+  async findSongWords(query: GetSongWordsQueryParams) {
+    return (await this.buildSongWordsQuery(query)).getRawMany();
+  }
+
+  async findBySongId(id: number): Promise<SongWord[]> {
     return this.songWordRepository.find({
       where: {
-        song: { songId },
+        song: { id },
       },
     });
   }
