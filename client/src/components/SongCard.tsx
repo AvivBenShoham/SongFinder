@@ -5,15 +5,35 @@ import CardContent from "@mui/material/CardContent";
 import CardMedia from "@mui/material/CardMedia";
 import Typography from "@mui/material/Typography";
 
+interface SongCardProps {
+  name: string;
+  album: string;
+  releaseDate: string;
+  coverUrl: string;
+  artist: string;
+  onClick?: React.MouseEventHandler<HTMLDivElement> | undefined;
+}
+
 export default function SongCard({
   name = "",
   album = "",
   releaseDate = "",
   coverUrl = "",
   artist = "",
-}) {
+  ...props
+}: SongCardProps) {
   return (
-    <Card sx={{ display: "flex", maxHeight: 160 }}>
+    <Card
+      onClick={props?.onClick}
+      sx={{
+        display: "flex",
+        maxHeight: 160,
+        cursor: "pointer",
+        "&:hover": {
+          bgcolor: "grey.600",
+        },
+      }}
+    >
       <Box sx={{ display: "flex", flexDirection: "column" }}>
         <CardContent sx={{ flex: "1 0 auto", width: 300 }}>
           <Typography component="div" variant="h5">

@@ -8,13 +8,14 @@ import { DatePicker, LocalizationProvider } from "@mui/x-date-pickers";
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import { useQuery } from "@tanstack/react-query";
 import httpClient from "../httpClient";
-import { useSearchParams } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import dayjs from "dayjs";
 
 export default function Home() {
   const [searchParams, setSearchParams] = useSearchParams();
   const [page, setPage] = React.useState(1);
   const [rowsPerPage, setRowsPerPage] = React.useState(12);
+  const navigate = useNavigate();
 
   const {
     data: { songs, totalPages },
@@ -127,7 +128,13 @@ export default function Home() {
               artist?: string | undefined;
             }
           ) => (
-            <SongCard key={song?.id} {...song} />
+            <SongCard
+              key={song?.id}
+              {...song}
+              onClick={() => {
+                navigate(`/lyrics/${song?.id}`);
+              }}
+            />
           )
         )}
       </Grid>

@@ -19,6 +19,7 @@ export class SongWordController {
   @ApiResponse({ type: lyricsSuccResponse })
   async findAll(@Param('songId', PositiveNumberPipe) id: number) {
     const songWords = await this.songWordService.findBySongId(id);
+
     return { lyrics: this.songWordService.convertSongWordsToLyrics(songWords) };
   }
 

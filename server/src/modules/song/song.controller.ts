@@ -3,6 +3,8 @@ import {
   Body,
   Controller,
   Get,
+  Param,
+  ParseIntPipe,
   Post,
   Query,
 } from '@nestjs/common';
@@ -27,6 +29,7 @@ import { SongContributerService } from '../songContributer/songContributer.servi
 import { getSongById } from 'genius-lyrics-api';
 import { Song } from './song.entity';
 import { GetSongsQueryParams } from './dtos';
+import { Transform } from 'class-transformer';
 
 @Controller('songs')
 @ApiTags('songs')
@@ -49,6 +52,11 @@ export class SongController {
       pageSize: query.pageSize,
       totalPages: Math.ceil(total / query.pageSize),
     };
+  }
+
+  @Get('/:songId')
+  async findOne(@Param('songId', ParseIntPipe) songId: number) {
+    return this.songService.findOne(songId);
   }
 
   @Post()

@@ -5,7 +5,7 @@ import Autocomplete from "../components/Autocomplete";
 import { Pagination, Stack } from "@mui/material";
 import { useQuery } from "@tanstack/react-query";
 import httpClient from "../httpClient";
-import { useSearchParams } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import SongWordCard from "../components/SongWordCard";
 
 export interface SongWordResult {
@@ -23,6 +23,7 @@ export default function Words() {
   const [searchParams, setSearchParams] = useSearchParams();
   const [page, setPage] = React.useState(1);
   const [rowsPerPage, setRowsPerPage] = React.useState(4);
+  const navigate = useNavigate();
 
   const { data: wordsCount } = useQuery({
     queryKey: ["words", "count", searchParams.toString()],
@@ -114,7 +115,13 @@ export default function Words() {
         }}
       >
         {words.map((songWord) => (
-          <SongWordCard key={songWord.word} {...songWord} />
+          <SongWordCard
+            key={songWord.word}
+            {...songWord}
+            onClick={(wordDoc) => {
+              navigate(`/lyrics/${wordDoc.songId}`);
+            }}
+          />
         ))}
       </Grid>
       <Pagination

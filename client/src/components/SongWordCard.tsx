@@ -5,7 +5,11 @@ import Typography from "@mui/material/Typography";
 import { SongWordResult } from "../routes/Words";
 import { Stack } from "@mui/material";
 
-export default function SongWordCard(props: SongWordResult) {
+interface SongWordCardProps extends SongWordResult {
+  onClick?: (wordDoc: any) => void;
+}
+
+export default function SongWordCard(props: SongWordCardProps) {
   return (
     <Card
       sx={{
@@ -36,6 +40,7 @@ export default function SongWordCard(props: SongWordResult) {
             .map((doc) => {
               return (
                 <Stack
+                  onClick={props?.onClick ? () => props?.onClick(doc) : null}
                   sx={{
                     minWidth: 200,
                     bgcolor: "#e1e1e129",
@@ -43,7 +48,7 @@ export default function SongWordCard(props: SongWordResult) {
                     borderRadius: 1,
                     cursor: "pointer",
                     "&:hover": {
-                      bgcolor: "#2e7074b8",
+                      bgcolor: "grey.600",
                     },
                   }}
                 >

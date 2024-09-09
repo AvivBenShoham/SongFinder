@@ -6,6 +6,7 @@ import HomeRoundedIcon from "@mui/icons-material/HomeRounded";
 import AnalyticsRoundedIcon from "@mui/icons-material/AnalyticsRounded";
 import LayersOutlinedIcon from "@mui/icons-material/LayersOutlined";
 import FontDownloadRoundedIcon from "@mui/icons-material/FontDownloadRounded";
+import SongLyrics from "./SongLyrics";
 
 export const AppRoutes = {
   Home: {
@@ -37,6 +38,7 @@ export const AppRouter = () => (
         {Object.values(AppRoutes).map((route) => (
           <Route path={route.path} element={route.element} />
         ))}
+        <Route path={"lyrics/:songId"} element={<SongLyrics />} />
         <Route path="" element={<Navigate to="home" />} />
       </Route>
     </Routes>
