@@ -44,7 +44,7 @@ export default function CustomAutocomplete(props: CustomAutocompleteProps) {
           </li>
         );
       }}
-      sx={{ minWidth: 300 }}
+      sx={{ minWidth: 240 }}
       renderInput={(params) => <TextField {...params} label={props?.label} />}
     />
   );

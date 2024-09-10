@@ -7,6 +7,7 @@ import { useQuery } from "@tanstack/react-query";
 import httpClient from "../httpClient";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import SongWordCard from "../components/SongWordCard";
+import { useDebounce } from "@uidotdev/usehooks";
 
 export interface SongWordResult {
   word: string;
@@ -25,19 +26,21 @@ export default function Words() {
   const [rowsPerPage, setRowsPerPage] = React.useState(4);
   const navigate = useNavigate();
 
+  const queryString = useDebounce(searchParams.toString(), 300);
+
   const { data: wordsCount } = useQuery({
-    queryKey: ["words", "count", searchParams.toString()],
+    queryKey: ["words", "count", queryString],
     queryFn: async () =>
-      (await httpClient.get(`lyrics/count?${searchParams.toString()}`)).data,
+      (await httpClient.get(`lyrics/count?${queryString}`)).data,
     initialData: 0,
   });
 
   const { data: words } = useQuery({
-    queryKey: ["words", searchParams.toString(), page, rowsPerPage],
+    queryKey: ["words", queryString, page, rowsPerPage],
     queryFn: async () =>
       (
         await httpClient.get(
-          `lyrics?page=${page}&pageSize=${rowsPerPage}&${searchParams.toString()}`
+          `lyrics?page=${page}&pageSize=${rowsPerPage}&${queryString}`
         )
       ).data as SongWordResult[],
     initialData: [],

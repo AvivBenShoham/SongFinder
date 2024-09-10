@@ -22,6 +22,14 @@ export class SongService {
 
     const queryBuilder = this.songRepository.createQueryBuilder('song');
 
+    if (query.songName) {
+      const searchString = `%${query.songName.toLowerCase()}%`;
+
+      queryBuilder.andWhere('LOWER(song.name) LIKE :searchString', {
+        searchString,
+      });
+    }
+
     if (words.length > 0) {
       queryBuilder
         .innerJoinAndSelect('song.lyrics', 'song_words')

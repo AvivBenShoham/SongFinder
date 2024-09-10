@@ -10,6 +10,8 @@ import { useQuery } from "@tanstack/react-query";
 import httpClient from "../httpClient";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import dayjs from "dayjs";
+import Search from "../components/Search";
+import { useDebounce } from "@uidotdev/usehooks";
 
 export default function Home() {
   const [searchParams, setSearchParams] = useSearchParams();
@@ -17,14 +19,16 @@ export default function Home() {
   const [rowsPerPage, setRowsPerPage] = React.useState(12);
   const navigate = useNavigate();
 
+  const queryString = useDebounce(searchParams.toString(), 300);
+
   const {
     data: { songs, totalPages },
   } = useQuery({
-    queryKey: ["songs", searchParams.toString(), page, rowsPerPage],
+    queryKey: ["songs", queryString, page, rowsPerPage],
     queryFn: async () =>
       (
         await httpClient.get(
-          `songs?page=${page}&pageSize=${rowsPerPage}&${searchParams.toString()}`
+          `songs?page=${page}&pageSize=${rowsPerPage}&${queryString}`
         )
       ).data,
     initialData: { songs: [], totalPages: 1, total: 0 },
@@ -36,7 +40,7 @@ export default function Home() {
     setSearchParams((prev) => {
       prev.delete(key);
 
-      if (value?.length >= 0) {
+      if (typeof value === "object" && value?.length >= 0) {
         value.forEach((element: string) => {
           prev.append(key, element);
         });
@@ -70,10 +74,18 @@ export default function Home() {
         overflow: "hidden",
       }}
     >
-      <Typography component="h2" variant="h6" sx={{ mb: 2 }}>
+      <Typography component="h2" variant="h6" sx={{ mb: 1 }}>
         Overview
       </Typography>
       <Stack direction="row" spacing={1} marginY={2}>
+        <Search
+          sx={{ minWidth: 240 }}
+          placeholder="Search by song name..."
+          value={searchParams.get("songName")}
+          onChange={(event) => {
+            handleSearchParamsChange("songName", event.target.value);
+          }}
+        />
         <Autocomplete
           label="Filter words"
           freeSolo

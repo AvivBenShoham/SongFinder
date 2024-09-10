@@ -1,12 +1,9 @@
 import * as React from "react";
-import Grid from "@mui/material/Grid2";
 import Typography from "@mui/material/Typography";
-import Autocomplete from "../components/Autocomplete";
-import { Pagination, Stack } from "@mui/material";
+import { Stack } from "@mui/material";
 import { useQuery } from "@tanstack/react-query";
 import httpClient from "../httpClient";
 import { useParams, useSearchParams } from "react-router-dom";
-import SongWordCard from "../components/SongWordCard";
 import LyricsCard from "../components/LyricsCard";
 
 export interface SongLyrics {

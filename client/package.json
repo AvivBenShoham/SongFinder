@@ -20,6 +20,7 @@
     "@mui/x-tree-view": "^7.16.0",
     "@react-spring/web": "^9.7.4",
     "@tanstack/react-query": "^5.55.0",
+    "@uidotdev/usehooks": "^2.4.1",
     "axios": "^1.7.7",
     "dayjs": "^1.11.13",
     "react": "^18.3.1",

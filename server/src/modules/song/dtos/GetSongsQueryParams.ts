@@ -24,4 +24,8 @@ export class GetSongsQueryParams {
   @IsOptional()
   @IsString()
   date?: string;
+
+  @IsOptional()
+  @IsString()
+  songName?: string;
 }

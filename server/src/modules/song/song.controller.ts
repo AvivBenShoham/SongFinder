@@ -29,7 +29,6 @@ import { SongContributerService } from '../songContributer/songContributer.servi
 import { getSongById } from 'genius-lyrics-api';
 import { Song } from './song.entity';
 import { GetSongsQueryParams } from './dtos';
-import { Transform } from 'class-transformer';
 
 @Controller('songs')
 @ApiTags('songs')
