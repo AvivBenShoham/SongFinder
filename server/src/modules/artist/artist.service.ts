@@ -1,9 +1,10 @@
-import { Injectable } from '@nestjs/common';
-import { In, Repository } from 'typeorm';
+import { Injectable, Logger } from '@nestjs/common';
+import { In, Repository, createQueryBuilder } from 'typeorm';
 import { Artist } from './artist.entity';
 import { InjectRepository } from '@nestjs/typeorm';
 import { createArtistDto } from './artist.dto';
-import { formatText } from 'src/utils';
+import { formatText, getQueryParamList } from 'src/utils';
+import { GetArtistsQueryParams } from './dtos';
 
 interface HasArtistName {
   artistName: string;
@@ -17,9 +18,11 @@ export class ArtistService {
   ) {}
 
   async insert(createArtistDto: createArtistDto) {
-    const exists = await this.findByName(createArtistDto.name);
+    const existingRecord = await this.artistRepository.findOne({
+      where: { name: createArtistDto.name },
+    });
 
-    if (exists.length > 0) {
+    if (!!existingRecord) {
       return;
     }
 
@@ -27,8 +30,10 @@ export class ArtistService {
     return this.artistRepository.save(newArtist);
   }
 
-  async findAll(): Promise<Artist[]> {
-    return this.artistRepository.find();
+  async findAll(query: GetArtistsQueryParams): Promise<Artist[]> {
+    const queryBuilder = this.artistRepository.createQueryBuilder('artist');
+
+    return queryBuilder.getMany();
   }
 
   async findByName(name: string): Promise<Artist[]> {
@@ -40,17 +45,13 @@ export class ArtistService {
   ): Promise<Array<T & { artistId: number }>> {
     const artists = await this.artistRepository.find({
       where: {
-        lowercasedName: In(
-          array.map((object) => formatText(object.artistName)),
-        ),
+        name: In(array.map((object) => object.artistName)),
       },
     });
 
     const nameToIdHash = new Map();
 
-    artists.map(({ lowercasedName, artistId }) =>
-      nameToIdHash.set(lowercasedName, artistId),
-    );
+    artists.map(({ name, artistId }) => nameToIdHash.set(name, artistId));
 
     return array.map((object) => {
       const withAddId = {
@@ -66,20 +67,14 @@ export class ArtistService {
 
   // works according to the assumption that each artists has a unique name
   async checkIfExists(names: string[]): Promise<boolean> {
-    const lowerCasedNames = names.map(formatText);
-
     const artists = await this.artistRepository.find({
       where: {
-        lowercasedName: In(lowerCasedNames),
+        name: In(names),
       },
     });
 
-    const artistsLowerCasedNames = artists.map(
-      (artist) => artist.lowercasedName,
-    );
+    const artistsNames = artists.map((artist) => artist.name);
 
-    return lowerCasedNames.every((name) =>
-      artistsLowerCasedNames.includes(name),
-    );
+    return names.every((name) => artistsNames.includes(name));
   }
 }

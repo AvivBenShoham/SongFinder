@@ -8,6 +8,7 @@ import httpClient from "../httpClient";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import SongWordCard from "../components/SongWordCard";
 import { useDebounce } from "@uidotdev/usehooks";
+import Search from "../components/Search";
 
 export interface SongWordResult {
   word: string;
@@ -52,7 +53,7 @@ export default function Words() {
     setSearchParams((prev) => {
       prev.delete(key);
 
-      if (value?.length >= 0) {
+      if (typeof value === "object" && value?.length >= 0) {
         value.forEach((element: string) => {
           prev.append(key, element);
         });
@@ -62,12 +63,6 @@ export default function Words() {
 
       return prev;
     });
-  };
-
-  const getSearchParamValue = (key: string) => {
-    const value = searchParams.get(key);
-
-    return value;
   };
 
   const handleChangePage = (
@@ -90,6 +85,14 @@ export default function Words() {
         Overview
       </Typography>
       <Stack direction="row" spacing={1} marginY={2}>
+        <Search
+          sx={{ minWidth: 240 }}
+          placeholder="Search by word..."
+          value={searchParams.get("word")}
+          onChange={(event) => {
+            handleSearchParamsChange("word", event.target.value);
+          }}
+        />
         <Autocomplete
           label="Filter songs"
           freeSolo

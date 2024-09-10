@@ -13,16 +13,8 @@ export class Artist {
   @PrimaryGeneratedColumn()
   artistId: number;
 
-  @Column({ type: 'varchar', length: 255 })
+  @Column({ type: 'varchar', length: 255, unique: true })
   name: string;
-
-  @Column({
-    type: 'varchar',
-    length: 255,
-    name: 'lowercased_name',
-    unique: true, // because we need some identifier to identify artist when receiving a request
-  })
-  lowercasedName: string;
 
   @Column({
     type: 'varchar',
@@ -34,9 +26,4 @@ export class Artist {
 
   @OneToMany(() => SongContributer, (contributer) => contributer.artist)
   contributions: SongContributer[];
-
-  @BeforeInsert()
-  setLowercasedName() {
-    this.lowercasedName = formatText(this.name);
-  }
 }

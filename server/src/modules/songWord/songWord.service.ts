@@ -14,7 +14,7 @@ export class SongWordService {
     private songWordRepository: Repository<SongWord>,
   ) {}
 
-  private async buildSongWordsQuery(query: GetSongWordsQueryParams) {
+  private buildSongWordsFilter(query: GetSongWordsQueryParams) {
     const songs = getQueryParamList(query.songs).map(formatText);
 
     const queryBuilder = this.songWordRepository
@@ -22,6 +22,13 @@ export class SongWordService {
       .select('song_word.word', 'word')
       .where("song_word.word ~* '^[a-z]+$'")
       .andWhere("song_word.word NOT IN ('a', 'an', 'the')");
+
+    if (query.word) {
+      const searchString = `%${query.word}%`;
+      queryBuilder.andWhere('song_word.word LIKE :searchString', {
+        searchString,
+      });
+    }
 
     if (songs.length > 0) {
       queryBuilder.andWhere('song_word.song IN (:...songs)', { songs });
@@ -42,12 +49,16 @@ export class SongWordService {
       }
     });
 
-    queryBuilder
-      .addSelect(`JSON_AGG(song_word)`, 'documents')
-      .groupBy('song_word.word');
+    return queryBuilder;
+  }
+
+  private buildSongWordsPagination(query: GetSongWordsQueryParams) {
+    const queryBuilder = this.buildSongWordsFilter(query);
 
     if (query.page && query.pageSize) {
       queryBuilder
+        .addSelect(`JSON_AGG(song_word)`, 'documents')
+        .groupBy('song_word.word')
         .orderBy('song_word.word')
         .skip((query.page - 1) * query.pageSize)
         .take(query.pageSize);
@@ -57,11 +68,17 @@ export class SongWordService {
   }
 
   async countSongWords(query: GetSongWordsQueryParams) {
-    return (await this.buildSongWordsQuery(query)).getCount();
+    const countQuery = this.buildSongWordsFilter(query).select(
+      'COUNT(DISTINCT song_word.word)',
+      'count',
+    );
+
+    const result = await countQuery.getRawOne();
+    return parseInt(result.count, 10);
   }
 
   async findSongWords(query: GetSongWordsQueryParams) {
-    return (await this.buildSongWordsQuery(query)).getRawMany();
+    return this.buildSongWordsPagination(query).getRawMany();
   }
 
   async findBySongId(id: number): Promise<SongWord[]> {

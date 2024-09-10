@@ -3,6 +3,7 @@ import {
   Body,
   Controller,
   Get,
+  Logger,
   Param,
   ParseIntPipe,
   Post,
@@ -51,6 +52,11 @@ export class SongController {
       pageSize: query.pageSize,
       totalPages: Math.ceil(total / query.pageSize),
     };
+  }
+
+  @Get('albums')
+  async findAllAlbums() {
+    return this.songService.findAllAlbums();
   }
 
   @Get('/:songId')
@@ -116,74 +122,87 @@ export class SongController {
         'kN3y5VcTL7u0dpKKaBN61aDjJvGUuQIcv-goEsxzL6FZzQqgG7pfoRspNMaTslL7',
     };
 
-    const arr = new Array(300)
+    const arr = new Array(20)
       .fill(0)
       .map((_, i) => Math.floor(Math.random() * 9999999));
 
     const songs = (
-      await Promise.allSettled(
-        arr.map(async (index) =>
-          (
-            await Promise.all([
-              getSongById(index, options.apiKey),
-              fetch(`https://api.genius.com/songs/${index}`, {
+      await Promise.all(
+        arr.map(async (songId) => {
+          try {
+            const songLyrics = await getSongById(songId, options.apiKey);
+            const songData = await fetch(
+              `https://api.genius.com/songs/${songId}`,
+              {
                 headers: {
                   Authorization: `Bearer ${options.apiKey}`,
                 },
-              }).then((res) => res.json()),
-            ])
-          ).reduce((obj, el) => ({ ...obj, ...el }), {}),
-        ),
-      )
-    )
-      .filter((promise) => promise.status === 'fulfilled')
-      .map(
-        (promiseResult: PromiseFulfilledResult<any>) => promiseResult?.value,
-      );
+              },
+            ).then((res) => res.json());
 
-    console.log('GOT SONGS: ', songs.length);
+            return { ...songData, ...songLyrics };
+          } catch (error) {
+            Logger.warn(`Failed to fetch song id: ${songId}`);
+            return null;
+          }
+        }),
+      )
+    ).filter((song) => song !== null && !!song?.lyrics);
+
+    Logger.log(`Start seeding ${songs.length} songs`);
 
     const songsDtos = (
       await Promise.allSettled(
         songs.map(async (songData) => {
-          const artists = [
-            ...songData.response.song.writer_artists.map((artist) => ({
-              ...artist,
-              type: 'writer',
-            })),
-            ...songData.response.song.producer_artists.map((artist) => ({
-              ...artist,
-              type: 'producer',
-            })),
-            ...[
-              ...songData.response.song.primary_artists,
-              ...songData.response.song.featured_artists,
-            ].map((artist) => ({
-              ...artist,
-              type: 'singer',
-            })),
-          ];
+          try {
+            const artists = [
+              ...(songData.response.song?.writer_artists || []).map(
+                (artist) => ({
+                  ...artist,
+                  type: 'writer',
+                }),
+              ),
+              ...(songData.response.song?.producer_artists || []).map(
+                (artist) => ({
+                  ...artist,
+                  type: 'producer',
+                }),
+              ),
+              ...[
+                ...(songData.response.song?.primary_artists || []),
+                ...(songData.response.song?.featured_artists || []),
+              ].map((artist) => ({
+                ...artist,
+                type: 'singer',
+              })),
+            ];
 
-          await Promise.allSettled(
-            artists.map((artist) =>
-              this.artistService.insert({
-                name: artist.name,
-                imageUrl: artist.image_url,
-              }),
-            ),
-          );
+            await Promise.all(
+              artists.map(async (artist) =>
+                this.artistService.insert({
+                  name: artist.name,
+                  imageUrl: artist.image_url,
+                }),
+              ),
+            ).catch((reason) =>
+              Logger.warn(`Seed warn artists insert: ${reason}`),
+            );
 
-          return {
-            name: songData.title,
-            album: songData.response.song.album.name,
-            releaseDate: songData.response.song.release_date,
-            coverUrl: songData.response.song.song_art_image_thumbnail_url,
-            lyrics: songData.lyrics,
-            contributers: artists.map((artist) => ({
-              type: artist.type,
-              artistName: artist.name,
-            })),
-          };
+            return {
+              name: songData?.title,
+              album: songData.response.song?.album?.name,
+              releaseDate: songData.response?.song?.release_date,
+              coverUrl: songData.response.song?.song_art_image_thumbnail_url,
+              lyrics: songData.lyrics,
+              contributers: artists.map((artist) => ({
+                type: artist?.type,
+                artistName: artist?.name,
+              })),
+            };
+          } catch (error) {
+            Logger.error(error);
+            throw error;
+          }
         }),
       )
     )
@@ -193,12 +212,12 @@ export class SongController {
         (songDTO) => songDTO.name && songDTO.lyrics && songDTO.releaseDate,
       );
 
-    console.log('START INSERTING: ', songsDtos.length);
+    Logger.log(`Start inserting ${songsDtos.length} songs`);
 
     await Promise.allSettled(
       songsDtos.map(async (songDto) => this.create(songDto)),
     );
 
-    console.log('SEED FINISHED');
+    Logger.log(`Seed finished :)`);
   }
 }

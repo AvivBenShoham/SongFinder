@@ -33,4 +33,8 @@ export class GetSongWordsQueryParams {
   @IsOptional()
   @Type(() => Number)
   col?: number;
+
+  @IsOptional()
+  @IsString()
+  word?: string;
 }

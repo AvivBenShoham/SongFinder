@@ -4,12 +4,13 @@ import Card from "@mui/material/Card";
 import CardContent from "@mui/material/CardContent";
 import CardMedia from "@mui/material/CardMedia";
 import Typography from "@mui/material/Typography";
+import DefaultAlbumCover from "../assets/music-note.jpg";
 
 interface SongCardProps {
   name: string;
   album: string;
   releaseDate: string;
-  coverUrl: string;
+  coverUrl?: string;
   artist: string;
   onClick?: React.MouseEventHandler<HTMLDivElement> | undefined;
 }
@@ -18,7 +19,6 @@ export default function SongCard({
   name = "",
   album = "",
   releaseDate = "",
-  coverUrl = "",
   artist = "",
   ...props
 }: SongCardProps) {
@@ -62,7 +62,7 @@ export default function SongCard({
       <CardMedia
         component="img"
         sx={{ width: 120, height: 120 }}
-        image={coverUrl}
+        src={props.coverUrl || DefaultAlbumCover}
         alt="album cover"
       />
     </Card>

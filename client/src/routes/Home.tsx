@@ -34,6 +34,20 @@ export default function Home() {
     initialData: { songs: [], totalPages: 1, total: 0 },
   });
 
+  const { data: artists } = useQuery({
+    queryKey: ["artists"],
+    queryFn: async () => (await httpClient.get(`artists`)).data,
+    initialData: [],
+    select: (data) => data.map((artist) => artist.name),
+  });
+
+  const { data: albums } = useQuery({
+    queryKey: ["albums"],
+    queryFn: async () => (await httpClient.get(`songs/albums`)).data,
+    initialData: [],
+    select: (data) => data.map((doc) => doc.album),
+  });
+
   const handleSearchParamsChange = (key: string, value: any) => {
     setPage(1);
 
@@ -50,12 +64,6 @@ export default function Home() {
 
       return prev;
     });
-  };
-
-  const getSearchParamValue = (key: string) => {
-    const value = searchParams.get(key);
-
-    return value;
   };
 
   const handleChangePage = (
@@ -98,6 +106,7 @@ export default function Home() {
           label="Filter albums"
           freeSolo
           value={searchParams.getAll("albums")}
+          options={albums}
           onChange={(_, newValue) =>
             handleSearchParamsChange("albums", newValue)
           }
@@ -106,6 +115,7 @@ export default function Home() {
           label="Filter artists"
           freeSolo
           value={searchParams.getAll("artists")}
+          options={artists}
           onChange={(_, newValue) =>
             handleSearchParamsChange("artists", newValue)
           }
@@ -115,7 +125,7 @@ export default function Home() {
             label="Filter by date"
             slotProps={{ textField: { size: "small" } }}
             sx={{ minWidth: 200 }}
-            value={dayjs(getSearchParamValue("date") || new Date())}
+            value={dayjs(searchParams.get("date") || new Date())}
             onChange={(newValue) => handleSearchParamsChange("date", newValue)}
           />
         </LocalizationProvider>{" "}

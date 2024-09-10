@@ -18,7 +18,7 @@ export class SongService {
   ): SelectQueryBuilder<Song> {
     const words = getQueryParamList(query?.words).map(formatText);
     const albums = getQueryParamList(query?.albums);
-    const artists = getQueryParamList(query?.artists).map(formatText);
+    const artists = getQueryParamList(query?.artists);
 
     const queryBuilder = this.songRepository.createQueryBuilder('song');
 
@@ -43,8 +43,8 @@ export class SongService {
     if (artists.length > 0) {
       queryBuilder
         .innerJoinAndSelect('song.contributers', 'song_contributers')
-        .innerJoinAndSelect('song_contributers.artist', 'artists')
-        .andWhere('artists.lowercasedName IN (:...artists)', {
+        .innerJoinAndSelect('song_contributers.artist', 'artist')
+        .andWhere('artist.name IN (:...artists)', {
           artists,
         });
     }
@@ -98,8 +98,7 @@ export class SongService {
       const match = contributers.every((contributer) =>
         song.contributers.some(
           (existingContributer) =>
-            existingContributer.artist.lowercasedName ===
-              formatText(contributer.artistName) &&
+            existingContributer.artist.name === contributer.artistName &&
             existingContributer.type === contributer.type,
         ),
       );
@@ -110,5 +109,12 @@ export class SongService {
     }
 
     return null; // No matching song found
+  }
+
+  public async findAllAlbums() {
+    return this.songRepository
+      .createQueryBuilder('song')
+      .select('DISTINCT(song.album) album')
+      .getRawMany();
   }
 }
