@@ -11,5 +11,5 @@ export class createArtistDto {
   @IsUrl({ require_tld: false }, { message: 'Invalid URL format' })
   @IsString()
   @IsOptional()
-  imageUrl: URL;
+  imageUrl?: string;
 }

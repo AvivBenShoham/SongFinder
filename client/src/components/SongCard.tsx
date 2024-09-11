@@ -11,7 +11,7 @@ interface SongCardProps {
   album: string;
   releaseDate: string;
   coverUrl?: string;
-  artist: string;
+  artist?: { name: string };
   onClick?: React.MouseEventHandler<HTMLDivElement> | undefined;
 }
 
@@ -19,7 +19,7 @@ export default function SongCard({
   name = "",
   album = "",
   releaseDate = "",
-  artist = "",
+  artist = { name: "" },
   ...props
 }: SongCardProps) {
   return (
@@ -37,7 +37,7 @@ export default function SongCard({
       <Box sx={{ display: "flex", flexDirection: "column" }}>
         <CardContent sx={{ flex: "1 0 auto", width: 300 }}>
           <Typography component="div" variant="h5">
-            {name.split("by").slice(0, -1)[0].trim()}
+            {name}
           </Typography>
           <Typography
             variant="subtitle1"
@@ -49,7 +49,7 @@ export default function SongCard({
               textOverflow: "ellipsis",
             }}
           >
-            {artist || name.split("by").slice(-1)[0].trim()}
+            {artist.name}
           </Typography>
           <Typography variant="body1" sx={{ color: "text.secondary" }}>
             {album}

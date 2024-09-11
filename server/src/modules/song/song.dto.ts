@@ -12,6 +12,7 @@ import {
 import { Type } from 'class-transformer';
 import { SongContributer } from '../songContributer/songContributer.entity';
 import { SongWord } from '../songWord/songWord.entity';
+import { Artist } from '../artist/artist.entity';
 
 export default class createSongReqDto {
   @ApiProperty()
@@ -22,6 +23,16 @@ export default class createSongReqDto {
   @IsOptional()
   @IsString()
   album?: string;
+
+  @ApiProperty()
+  @IsOptional()
+  @IsString()
+  artist?: string;
+
+  @ApiProperty()
+  @IsOptional()
+  @IsString()
+  artistImageUrl?: string;
 
   @ApiProperty()
   @IsNotEmpty()
@@ -53,6 +64,7 @@ export class createSongDto {
   album?: string;
   releaseDate: Date;
   coverUrl?: URL;
+  artist?: Artist;
 }
 
 export class createSongSuccResponse {

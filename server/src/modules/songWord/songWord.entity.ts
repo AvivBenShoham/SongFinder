@@ -3,10 +3,10 @@ import { Song } from '../song/song.entity';
 
 @Entity({ name: 'song_words' })
 export class SongWord {
-  @PrimaryColumn({ type: 'varchar', length: 30 })
+  @PrimaryColumn({ type: 'varchar', length: 100 })
   word: string;
 
-  @PrimaryColumn({ type: 'varchar', length: 30, name: 'actual_word' })
+  @PrimaryColumn({ type: 'varchar', length: 100, name: 'actual_word' })
   actualWord: string;
 
   @ManyToOne(() => Song, (song) => song.id)

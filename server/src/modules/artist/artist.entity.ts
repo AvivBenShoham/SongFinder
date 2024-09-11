@@ -1,12 +1,6 @@
-import {
-  Entity,
-  Column,
-  PrimaryGeneratedColumn,
-  OneToMany,
-  BeforeInsert,
-} from 'typeorm';
+import { Entity, Column, PrimaryGeneratedColumn, OneToMany } from 'typeorm';
 import { SongContributer } from '../songContributer/songContributer.entity';
-import { formatText } from 'src/utils';
+import { Song } from '../song/song.entity';
 
 @Entity({ name: 'artists' })
 export class Artist {
@@ -22,8 +16,11 @@ export class Artist {
     nullable: true,
     name: 'image_url',
   })
-  imageUrl: URL;
+  imageUrl: string;
 
   @OneToMany(() => SongContributer, (contributer) => contributer.artist)
   contributions: SongContributer[];
+
+  @OneToMany(() => Song, (song) => song.id)
+  songs: Song[];
 }

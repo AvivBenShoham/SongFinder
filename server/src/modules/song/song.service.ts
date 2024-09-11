@@ -1,16 +1,28 @@
-import { Injectable } from '@nestjs/common';
-import { In, Repository, MoreThanOrEqual, SelectQueryBuilder } from 'typeorm';
+import { BadRequestException, Injectable, Logger } from '@nestjs/common';
+import {
+  In,
+  Repository,
+  MoreThanOrEqual,
+  SelectQueryBuilder,
+  InsertResult,
+} from 'typeorm';
 import { Song } from './song.entity';
 import { InjectRepository } from '@nestjs/typeorm';
 import createSongReqDto, { createSongDto } from './song.dto';
 import { formatText, getQueryParamList } from 'src/utils';
 import { GetSongsQueryParams } from './dtos';
+import { SongWordService } from '../songWord/songWord.service';
+import { ArtistService } from '../artist/artist.service';
+import { SongContributerService } from '../songContributer/songContributer.service';
 
 @Injectable()
 export class SongService {
   constructor(
     @InjectRepository(Song)
     private songRepository: Repository<Song>,
+    private readonly songWordService: SongWordService,
+    private readonly artistService: ArtistService,
+    private readonly contributerService: SongContributerService,
   ) {}
 
   private buildPaginationQuery(
@@ -42,9 +54,9 @@ export class SongService {
 
     if (artists.length > 0) {
       queryBuilder
-        .innerJoinAndSelect('song.contributers', 'song_contributers')
-        .innerJoinAndSelect('song_contributers.artist', 'artist')
-        .andWhere('artist.name IN (:...artists)', {
+        .leftJoinAndSelect('song.contributers', 'song_contributers')
+        .leftJoinAndSelect('song_contributers.artist', 'contributerArtist')
+        .andWhere('contributerArtist.name IN (:...artists)', {
           artists,
         });
     }
@@ -54,6 +66,8 @@ export class SongService {
         releaseDate: query.date,
       });
     }
+
+    queryBuilder.leftJoinAndSelect('song.artist', 'artist');
 
     if (query.page && query.pageSize) {
       queryBuilder
@@ -79,6 +93,7 @@ export class SongService {
 
   async insert(song: createSongDto): Promise<Song> {
     const newSong = this.songRepository.create(song);
+
     return this.songRepository.save(newSong);
   }
 
@@ -116,5 +131,66 @@ export class SongService {
       .createQueryBuilder('song')
       .select('DISTINCT(song.album) album')
       .getRawMany();
+  }
+
+  public async create(createSongDto: createSongReqDto) {
+    Logger.debug(`'Trying to create: ${JSON.stringify(createSongDto)}`);
+
+    const isAlreadyExists =
+      await this.findSongByNameAndContributers(createSongDto);
+
+    //TODO: add transactions
+    if (isAlreadyExists)
+      throw new BadRequestException('the song already exists');
+
+    const artists = [
+      ...createSongDto.contributers.map((artist) => ({
+        artistName: artist.artistName,
+        imageUrl: '',
+      })),
+      {
+        artistName: createSongDto.artist,
+        imageUrl: createSongDto?.artistImageUrl,
+      },
+    ];
+
+    Logger.debug(`Trying to insert new artists: ${JSON.stringify(artists)}`);
+
+    await Promise.allSettled(
+      artists.map(async (artist) =>
+        this.artistService.insert({
+          name: artist.artistName,
+          imageUrl: artist?.imageUrl,
+        }),
+      ),
+    );
+
+    try {
+      const artist = await this.artistService.findOneByName(
+        createSongDto.artist,
+      );
+
+      const song = await this.insert({ ...createSongDto, artist });
+
+      const contributers = await this.contributerService.createContributers(
+        createSongDto.contributers,
+        song,
+      );
+
+      const songWords = this.songWordService.convertLyricsToSongWords(
+        createSongDto.lyrics,
+        song,
+      );
+
+      await this.songWordService.insertMany(songWords);
+
+      Logger.log(`New song created: ${song?.id}`);
+
+      return { success: true, song, contributers, songWords };
+    } catch (error) {
+      Logger.error(error.toString());
+
+      throw error;
+    }
   }
 }

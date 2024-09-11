@@ -20,7 +20,6 @@ export default class addContributer {
   @ApiProperty({ type: 'string' })
   @IsNotEmpty()
   @IsString()
-  @Transform((param) => param.value.toLocaleLowerCase())
   artistName: Artist['name'];
 }
 

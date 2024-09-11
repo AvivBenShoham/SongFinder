@@ -1,5 +1,4 @@
 import {
-  BadRequestException,
   Body,
   Controller,
   Get,
@@ -20,26 +19,13 @@ import {
   ApiCreatedResponse,
   ApiTags,
 } from '@nestjs/swagger';
-import { SongWordService } from '../songWord/songWord.service';
-import { ArtistService } from '../artist/artist.service';
-import addContributer, {
-  ContributerType,
-  createContributerDto,
-} from '../songContributer/songContribuer.dto';
-import { SongContributerService } from '../songContributer/songContributer.service';
 import { getSongById } from 'genius-lyrics-api';
-import { Song } from './song.entity';
 import { GetSongsQueryParams } from './dtos';
 
 @Controller('songs')
 @ApiTags('songs')
 export class SongController {
-  constructor(
-    private readonly songService: SongService,
-    private readonly songWordService: SongWordService,
-    private readonly artistService: ArtistService,
-    private readonly contributerService: SongContributerService,
-  ) {}
+  constructor(private readonly songService: SongService) {}
 
   @Get('')
   async findAll(@Query() query: GetSongsQueryParams) {
@@ -69,50 +55,7 @@ export class SongController {
   @ApiCreatedResponse({ type: createSongSuccResponse })
   @ApiBadRequestResponse({ type: createSongBadRequest })
   async create(@Body() createSongDto: createSongReqDto) {
-    const isAlreadyExists =
-      await this.songService.findSongByNameAndContributers(createSongDto);
-    //TODO: add transactions
-    if (isAlreadyExists)
-      throw new BadRequestException('the song already exists');
-
-    const areAllArtistsExists = await this.artistService.checkIfExists(
-      createSongDto.contributers.map((contribuer) => contribuer.artistName),
-    );
-
-    if (!areAllArtistsExists)
-      throw new BadRequestException('Not all artists exists');
-
-    const song = await this.songService.insert(createSongDto);
-
-    const contributers = await this.createContributers(
-      createSongDto.contributers,
-      song,
-    );
-
-    const songWords = this.songWordService.convertLyricsToSongWords(
-      createSongDto.lyrics,
-      song,
-    );
-
-    await this.songWordService.insertMany(songWords);
-    return { success: true, song, contributers, songWords };
-  }
-
-  async createContributers(basicContributer: addContributer[], song: Song) {
-    const contributers = (await this.artistService.changeNamesToIds(
-      basicContributer,
-    )) as Array<{
-      artistId: number;
-      type: ContributerType;
-    }>;
-
-    const contributersToCreate: Array<createContributerDto> = contributers.map(
-      (contributer) => {
-        return { ...contributer, song };
-      },
-    );
-
-    return await this.contributerService.insertMany(contributersToCreate);
+    return this.songService.create(createSongDto);
   }
 
   @Post('seed')
@@ -122,100 +65,113 @@ export class SongController {
         'kN3y5VcTL7u0dpKKaBN61aDjJvGUuQIcv-goEsxzL6FZzQqgG7pfoRspNMaTslL7',
     };
 
-    const arr = new Array(20)
-      .fill(0)
-      .map((_, i) => Math.floor(Math.random() * 9999999));
+    const searchTerms = [
+      'Kendrick Lamar',
+      'Sia',
+      'The Weeknd',
+      'Anyma',
+      'Beyonce',
+      'Jungle',
+      'Drake',
+      'Bruno Mars',
+      'Fred again',
+      'Kanye West',
+      'SZA',
+      'Doja Cat',
+      'Adele',
+      'Tame Impala',
+      'Taylor Swift',
+      'ALOK',
+      'Tyler, The Creator',
+      'JAY-Z',
+      'J. Cole',
+      'Maroon 5',
+      'Billie Eilish',
+      'Khalid',
+      'Milky Chance',
+    ];
 
-    const songs = (
-      await Promise.all(
-        arr.map(async (songId) => {
-          try {
-            const songLyrics = await getSongById(songId, options.apiKey);
-            const songData = await fetch(
-              `https://api.genius.com/songs/${songId}`,
-              {
-                headers: {
-                  Authorization: `Bearer ${options.apiKey}`,
-                },
-              },
-            ).then((res) => res.json());
-
-            return { ...songData, ...songLyrics };
-          } catch (error) {
-            Logger.warn(`Failed to fetch song id: ${songId}`);
-            return null;
-          }
-        }),
-      )
-    ).filter((song) => song !== null && !!song?.lyrics);
-
-    Logger.log(`Start seeding ${songs.length} songs`);
-
-    const songsDtos = (
+    const fetchedSongs = (
       await Promise.allSettled(
-        songs.map(async (songData) => {
-          try {
-            const artists = [
-              ...(songData.response.song?.writer_artists || []).map(
-                (artist) => ({
-                  ...artist,
-                  type: 'writer',
-                }),
-              ),
-              ...(songData.response.song?.producer_artists || []).map(
-                (artist) => ({
-                  ...artist,
-                  type: 'producer',
-                }),
-              ),
-              ...[
-                ...(songData.response.song?.primary_artists || []),
-                ...(songData.response.song?.featured_artists || []),
-              ].map((artist) => ({
-                ...artist,
-                type: 'singer',
-              })),
-            ];
+        searchTerms.map(async (searchTerm) => {
+          Logger.debug(`Trying to seed: ${searchTerm}`);
 
-            await Promise.all(
-              artists.map(async (artist) =>
-                this.artistService.insert({
-                  name: artist.name,
-                  imageUrl: artist.image_url,
-                }),
-              ),
-            ).catch((reason) =>
-              Logger.warn(`Seed warn artists insert: ${reason}`),
+          const hits = await fetch(
+            `https://api.genius.com/search?q=${searchTerm}`,
+            {
+              headers: {
+                Authorization: `Bearer ${options.apiKey}`,
+              },
+            },
+          )
+            .then((res) => res.json())
+            .then((res) => res.response.hits.map((hit) => hit.result));
+
+          return (
+            await Promise.allSettled(
+              hits.map(async (songHit) => {
+                const songLyrics = await getSongById(
+                  songHit.id,
+                  options.apiKey,
+                );
+
+                Logger.debug(
+                  `Search of ${searchTerm} got lyrics of song: ${songHit.id}`,
+                );
+
+                return { ...songLyrics, ...songHit };
+              }),
+            )
+          )
+            .filter((promise) => promise.status === 'fulfilled')
+            .map(
+              (promiseResult: PromiseFulfilledResult<any>) =>
+                promiseResult?.value,
             );
-
-            return {
-              name: songData?.title,
-              album: songData.response.song?.album?.name,
-              releaseDate: songData.response?.song?.release_date,
-              coverUrl: songData.response.song?.song_art_image_thumbnail_url,
-              lyrics: songData.lyrics,
-              contributers: artists.map((artist) => ({
-                type: artist?.type,
-                artistName: artist?.name,
-              })),
-            };
-          } catch (error) {
-            Logger.error(error);
-            throw error;
-          }
         }),
       )
     )
       .filter((promise) => promise.status === 'fulfilled')
       .map((promiseResult: PromiseFulfilledResult<any>) => promiseResult?.value)
-      .filter(
-        (songDTO) => songDTO.name && songDTO.lyrics && songDTO.releaseDate,
-      );
+      .flat();
 
-    Logger.log(`Start inserting ${songsDtos.length} songs`);
+    const songs = fetchedSongs
+      .map((songData) => {
+        const contributers = [
+          ...(songData?.writer_artists || []).map((artist) => ({
+            artistName: artist?.name,
+            type: 'writer',
+          })),
+          ...(songData?.producer_artists || []).map((artist) => ({
+            artistName: artist?.name,
+            type: 'producer',
+          })),
+          ...[
+            ...(songData?.featured_artists || []),
+            ...(songData?.primary_artists || []),
+          ].map((artist) => ({
+            artistName: artist?.name,
+            type: 'singer',
+          })),
+        ];
+
+        return {
+          name: songData?.title,
+          artist: songData?.primary_artist?.name,
+          artistImageUrl: songData?.primary_artist?.image_url,
+          album: songData?.album?.name || songData?.title,
+          releaseDate: songData?.release_date_for_display,
+          coverUrl: songData?.song_art_image_thumbnail_url,
+          lyrics: songData.lyrics,
+          contributers,
+        };
+      })
+      .filter((song) => song !== null && !!song?.lyrics);
+
+    Logger.log(`Start seeding ${songs.length} songs`);
 
     await Promise.allSettled(
-      songsDtos.map(async (songDto) => this.create(songDto)),
+      songs.map((song) => this.songService.create(song)),
     );
 
     Logger.log(`Seed finished :)`);
