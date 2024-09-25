@@ -3,7 +3,7 @@ import Card from "@mui/material/Card";
 import CardContent from "@mui/material/CardContent";
 import Typography from "@mui/material/Typography";
 import { SongWordResult } from "../routes/Words";
-import { Stack } from "@mui/material";
+import { Paper, Stack } from "@mui/material";
 
 interface SongWordCardProps extends SongWordResult {
   onClick?: (wordDoc: any) => void;
@@ -14,7 +14,7 @@ export default function SongWordCard(props: SongWordCardProps) {
     <Card
       sx={{
         display: "flex",
-        maxHeight: 160,
+        maxHeight: 180,
         width: "100%",
         overflow: "hidden",
       }}
@@ -31,46 +31,59 @@ export default function SongWordCard(props: SongWordCardProps) {
           {props.word}
         </Typography>
         <Stack
-          spacing={1}
+          spacing={2}
           direction={"row"}
-          sx={{ flex: 1, overflow: "auto", mt: 1 }}
+          sx={{ flex: 1, overflow: "auto", mt: 1, p: 1 }}
         >
           {props.documents
             .sort((a, b) => a.songId - b.songId)
             .map((doc) => {
               return (
-                <Stack
-                  onClick={props?.onClick ? () => props?.onClick(doc) : null}
+                <Paper
+                  onClick={
+                    props?.onClick ? () => props?.onClick(doc) : () => {}
+                  }
+                  elevation={1}
                   sx={{
                     minWidth: 200,
-                    bgcolor: "#e1e1e129",
                     p: 1,
                     borderRadius: 1,
                     cursor: "pointer",
                     "&:hover": {
-                      bgcolor: "grey.600",
+                      bgcolor: "primary.main",
+                      "*": {
+                        color: "primary.contrastText",
+                      },
                     },
                   }}
                 >
-                  <Typography
-                    variant="subtitle1"
-                    sx={{
-                      fontWeight: "600",
-                      color: "text.primary",
-                      whiteSpace: "nowrap",
-                      overflow: "hidden",
-                      textOverflow: "ellipsis",
-                    }}
-                  >
-                    Song: {doc.songId}
-                  </Typography>
-                  <Typography variant="body1" sx={{ color: "text.secondary" }}>
-                    row: {doc.row}, column: {doc.col}
-                  </Typography>
-                  <Typography variant="body1" sx={{ color: "text.secondary" }}>
-                    stanza: {doc.stanza}, line: {doc.line}
-                  </Typography>
-                </Stack>
+                  <Stack>
+                    <Typography
+                      variant="subtitle1"
+                      sx={{
+                        fontWeight: "600",
+                        color: "text.primary",
+                        whiteSpace: "nowrap",
+                        overflow: "hidden",
+                        textOverflow: "ellipsis",
+                      }}
+                    >
+                      Song: {doc.songId}
+                    </Typography>
+                    <Typography
+                      variant="body1"
+                      sx={{ color: "text.secondary" }}
+                    >
+                      row: {doc.row}, column: {doc.col}
+                    </Typography>
+                    <Typography
+                      variant="body1"
+                      sx={{ color: "text.secondary" }}
+                    >
+                      stanza: {doc.stanza}, line: {doc.line}
+                    </Typography>
+                  </Stack>
+                </Paper>
               );
             })}
         </Stack>

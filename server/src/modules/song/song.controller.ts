@@ -137,7 +137,7 @@ export class SongController {
 
     const songs = fetchedSongs
       .map((songData) => {
-        const contributers = [
+        const contributors = [
           ...(songData?.writer_artists || []).map((artist) => ({
             artistName: artist?.name,
             type: 'writer',
@@ -163,7 +163,7 @@ export class SongController {
           releaseDate: songData?.release_date_for_display,
           coverUrl: songData?.song_art_image_thumbnail_url,
           lyrics: songData.lyrics,
-          contributers,
+          contributors,
         };
       })
       .filter((song) => song !== null && !!song?.lyrics);

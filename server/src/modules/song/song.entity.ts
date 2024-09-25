@@ -6,7 +6,7 @@ import {
   JoinColumn,
   ManyToOne,
 } from 'typeorm';
-import { SongContributer } from '../songContributer/songContributer.entity';
+import { SongContributor } from '../songContributor/songContributor.entity';
 import { SongWord } from '../songWord/songWord.entity';
 import { Artist } from '../artist/artist.entity';
 
@@ -36,6 +36,6 @@ export class Song {
   @OneToMany(() => SongWord, (songWord) => songWord.song)
   lyrics: SongWord[];
 
-  @OneToMany(() => SongContributer, (contributer) => contributer.song)
-  contributers: SongContributer[];
+  @OneToMany(() => SongContributor, (contributor) => contributor.song)
+  contributors: SongContributor[];
 }

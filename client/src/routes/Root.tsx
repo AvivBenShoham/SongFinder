@@ -21,6 +21,28 @@ export default function Root() {
   const [mode, setMode] = React.useState<PaletteMode>("dark");
   const dashboardTheme = createTheme(getDashboardTheme(mode));
 
+  React.useEffect(() => {
+    // Check if there is a preferred mode in localStorage
+    const savedMode = localStorage.getItem("themeMode");
+    if (savedMode) {
+      setMode(savedMode);
+    } else {
+      // If no preference is found, it uses system preference
+      const systemPrefersDark = window.matchMedia(
+        "(prefers-color-scheme: dark)"
+      ).matches;
+
+      setMode(systemPrefersDark ? "dark" : "light");
+    }
+  }, []);
+
+  const toggleColorMode = () => {
+    const newMode = mode === "dark" ? "light" : "dark";
+    setMode(newMode);
+
+    localStorage.setItem("themeMode", newMode);
+  };
+
   return (
     <ThemeProvider theme={dashboardTheme}>
       <QueryClientProvider client={queryClient}>
@@ -46,7 +68,7 @@ export default function Root() {
                 height: "100%",
               }}
             >
-              <Header />
+              <Header mode={mode} toggleColorMode={toggleColorMode} />
               <Outlet />
             </Stack>
           </Box>

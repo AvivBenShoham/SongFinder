@@ -7,15 +7,15 @@ import {
 } from 'typeorm';
 import { Song } from '../song/song.entity';
 import { Artist } from '../artist/artist.entity';
-import { ContributerType } from './songContribuer.dto';
+import { ContributorType } from './songContributor.dto';
 
 @Entity()
-export class SongContributer {
+export class SongContributor {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @Column({ type: 'enum', enum: ContributerType })
-  type: ContributerType;
+  @Column({ type: 'enum', enum: ContributorType })
+  type: ContributorType;
 
   @Column({ name: 'artist_id' })
   artistId: number;
@@ -24,6 +24,6 @@ export class SongContributer {
   @JoinColumn({ name: 'artist_id' })
   artist: Artist;
 
-  @ManyToOne(() => Song, (song) => song.contributers)
+  @ManyToOne(() => Song, (song) => song.contributors)
   song: Song;
 }

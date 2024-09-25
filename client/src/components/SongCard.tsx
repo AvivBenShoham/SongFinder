@@ -30,7 +30,10 @@ export default function SongCard({
         maxHeight: 160,
         cursor: "pointer",
         "&:hover": {
-          bgcolor: "grey.600",
+          bgcolor: "primary.light",
+          "*": {
+            color: "primary.contrastText",
+          },
         },
       }}
     >

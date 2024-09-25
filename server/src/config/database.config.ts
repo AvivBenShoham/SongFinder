@@ -1,7 +1,7 @@
 import { TypeOrmModuleOptions } from '@nestjs/typeorm';
 import {
   Song,
-  SongContributer,
+  SongContributor,
   SongPhrase,
   SongWord,
   WordGroup,
@@ -17,6 +17,6 @@ export default () =>
     username: process.env.DB_USERNAME || 'admin',
     password: process.env.DB_USERNAME || 'admin',
     database: process.env.DB_NAME || 'song_finder',
-    entities: [Song, SongWord, SongContributer, Artist, WordGroup, SongPhrase],
+    entities: [Song, SongWord, SongContributor, Artist, WordGroup, SongPhrase],
     synchronize: true,
   }) as TypeOrmModuleOptions;

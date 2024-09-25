@@ -4,18 +4,18 @@ import { IsEnum, IsNotEmpty, IsString } from 'class-validator';
 import { Transform } from 'class-transformer';
 import { Song } from '../song/song.entity';
 
-export enum ContributerType {
+export enum ContributorType {
   PRODUCER = 'producer',
   SINGER = 'singer',
   WRITER = 'writer',
   COMPOSITOR = 'compositor',
 }
 
-export default class addContributer {
-  @ApiProperty({ enum: ContributerType })
-  @IsEnum(ContributerType)
+export default class addContributor {
+  @ApiProperty({ enum: ContributorType })
+  @IsEnum(ContributorType)
   @IsNotEmpty()
-  type: ContributerType;
+  type: ContributorType;
 
   @ApiProperty({ type: 'string' })
   @IsNotEmpty()
@@ -23,8 +23,8 @@ export default class addContributer {
   artistName: Artist['name'];
 }
 
-export class createContributerDto {
-  type: ContributerType;
+export class createContributorDto {
+  type: ContributorType;
   artistId: number;
   song: Song;
 }

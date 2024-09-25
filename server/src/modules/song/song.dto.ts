@@ -1,5 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
-import addContributer from '../songContributer/songContribuer.dto';
+import addContributor from '../songContributor/songContributor.dto';
 import {
   IsArray,
   IsDate,
@@ -10,7 +10,7 @@ import {
   ValidateNested,
 } from 'class-validator';
 import { Type } from 'class-transformer';
-import { SongContributer } from '../songContributer/songContributer.entity';
+import { SongContributor } from '../songContributor/songContributor.entity';
 import { SongWord } from '../songWord/songWord.entity';
 import { Artist } from '../artist/artist.entity';
 
@@ -27,7 +27,7 @@ export default class createSongReqDto {
   @ApiProperty()
   @IsOptional()
   @IsString()
-  artist?: string;
+  artistName?: string;
 
   @ApiProperty()
   @IsOptional()
@@ -51,12 +51,12 @@ export default class createSongReqDto {
   @IsString()
   lyrics: string; // the lyrics are one large string, where stanzas are seperated with an empty line.
 
-  @ApiProperty({ type: () => addContributer, isArray: true })
+  @ApiProperty({ type: () => addContributor, isArray: true })
   @IsArray()
   @IsNotEmpty()
   @ValidateNested({ each: true })
-  @Type(() => addContributer)
-  contributers: addContributer[];
+  @Type(() => addContributor)
+  contributors: addContributor[];
 }
 
 export class createSongDto {
@@ -82,7 +82,7 @@ export class createSongSuccResponse {
       },
     ],
   })
-  contributers: SongContributer[];
+  contributors: SongContributor[];
 
   @ApiProperty({
     example: [

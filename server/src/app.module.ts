@@ -5,7 +5,7 @@ import configuration from './config/configuration';
 import databaseConfig from './config/database.config';
 import {
   Song,
-  SongContributer,
+  SongContributor,
   SongPhrase,
   SongWord,
   WordGroup,
@@ -17,7 +17,7 @@ import { SongModule } from './modules/song/song.module';
 import { ArtistModule } from './modules/artist/artist.module';
 import { SongWordModule } from './modules/songWord/songWord.module';
 import { WordGroupModule } from './modules/wordGroup/wordGroup.module';
-import { SongContributerModule } from './modules/songContributer/songContributer.module';
+import { SongContributorModule } from './modules/songContributor/songContributor.module';
 import { DataSource } from 'typeorm';
 
 //TODO: .env not getting imported
@@ -32,7 +32,7 @@ import { DataSource } from 'typeorm';
     TypeOrmModule.forFeature([
       Song,
       SongWord,
-      SongContributer,
+      SongContributor,
       Artist,
       WordGroup,
       SongPhrase,
@@ -45,7 +45,7 @@ import { DataSource } from 'typeorm';
     HealthModule,
     SongWordModule,
     WordGroupModule,
-    SongContributerModule,
+    SongContributorModule,
     SongModule,
   ],
 })

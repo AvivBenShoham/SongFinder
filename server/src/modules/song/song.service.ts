@@ -13,7 +13,7 @@ import { formatText, getQueryParamList } from 'src/utils';
 import { GetSongsQueryParams } from './dtos';
 import { SongWordService } from '../songWord/songWord.service';
 import { ArtistService } from '../artist/artist.service';
-import { SongContributerService } from '../songContributer/songContributer.service';
+import { SongContributorService } from '../songContributor/songContributor.service';
 
 @Injectable()
 export class SongService {
@@ -22,7 +22,7 @@ export class SongService {
     private songRepository: Repository<Song>,
     private readonly songWordService: SongWordService,
     private readonly artistService: ArtistService,
-    private readonly contributerService: SongContributerService,
+    private readonly contributorService: SongContributorService,
   ) {}
 
   private buildPaginationQuery(
@@ -49,14 +49,18 @@ export class SongService {
     }
 
     if (albums.length > 0) {
-      queryBuilder.where('song.album IN (:...albums)', { albums });
+      queryBuilder.andWhere('song.album IN (:...albums)', { albums });
     }
 
     if (artists.length > 0) {
       queryBuilder
-        .leftJoinAndSelect('song.contributers', 'song_contributers')
-        .leftJoinAndSelect('song_contributers.artist', 'contributerArtist')
-        .andWhere('contributerArtist.name IN (:...artists)', {
+        .leftJoinAndSelect('song.contributors', 'song_contributors')
+        .leftJoinAndSelect('song_contributors.artist', 'contributorArtist')
+        .leftJoinAndSelect('song.artist', 'songArtist')
+        .andWhere('contributorArtist.name IN (:...artists)', {
+          artists,
+        })
+        .orWhere('songArtist.name IN (:...artists)', {
           artists,
         });
     }
@@ -97,24 +101,24 @@ export class SongService {
     return this.songRepository.save(newSong);
   }
 
-  async findSongByNameAndContributers({
+  async findSongByNameAndContributors({
     name,
-    contributers,
+    contributors,
   }: createSongReqDto): Promise<Song | null> {
     const songs = await this.songRepository.find({
       where: { name },
-      relations: ['contributers', 'contributers.artist'], // Ensure to include relations
+      relations: ['contributors', 'contributors.artist'], // Ensure to include relations
     });
 
     if (songs.length === 0) return null;
 
-    // Iterate over each song to check if contributers match
+    // Iterate over each song to check if contributors match
     for (const song of songs) {
-      const match = contributers.every((contributer) =>
-        song.contributers.some(
-          (existingContributer) =>
-            existingContributer.artist.name === contributer.artistName &&
-            existingContributer.type === contributer.type,
+      const match = contributors.every((contributor) =>
+        song.contributors.some(
+          (existingContributor) =>
+            existingContributor.artist.name === contributor.artistName &&
+            existingContributor.type === contributor.type,
         ),
       );
 
@@ -137,19 +141,19 @@ export class SongService {
     Logger.debug(`'Trying to create: ${JSON.stringify(createSongDto)}`);
 
     const isAlreadyExists =
-      await this.findSongByNameAndContributers(createSongDto);
+      await this.findSongByNameAndContributors(createSongDto);
 
     //TODO: add transactions
     if (isAlreadyExists)
       throw new BadRequestException('the song already exists');
 
     const artists = [
-      ...createSongDto.contributers.map((artist) => ({
+      ...createSongDto.contributors.map((artist) => ({
         artistName: artist.artistName,
         imageUrl: '',
       })),
       {
-        artistName: createSongDto.artist,
+        artistName: createSongDto?.artistName,
         imageUrl: createSongDto?.artistImageUrl,
       },
     ];
@@ -167,13 +171,13 @@ export class SongService {
 
     try {
       const artist = await this.artistService.findOneByName(
-        createSongDto.artist,
+        createSongDto.artistName,
       );
 
       const song = await this.insert({ ...createSongDto, artist });
 
-      const contributers = await this.contributerService.createContributers(
-        createSongDto.contributers,
+      const contributors = await this.contributorService.createContributors(
+        createSongDto.contributors,
         song,
       );
 
@@ -186,7 +190,7 @@ export class SongService {
 
       Logger.log(`New song created: ${song?.id}`);
 
-      return { success: true, song, contributers, songWords };
+      return { success: true, song, contributors, songWords };
     } catch (error) {
       Logger.error(error.toString());
 
