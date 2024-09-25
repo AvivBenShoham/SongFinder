@@ -19,6 +19,7 @@ import { SongWordModule } from './modules/songWord/songWord.module';
 import { WordGroupModule } from './modules/wordGroup/wordGroup.module';
 import { SongContributorModule } from './modules/songContributor/songContributor.module';
 import { DataSource } from 'typeorm';
+import { SongPhraseModule } from './modules/songPhrase/songPhrase.module';
 
 //TODO: .env not getting imported
 
@@ -47,6 +48,7 @@ import { DataSource } from 'typeorm';
     WordGroupModule,
     SongContributorModule,
     SongModule,
+    SongPhraseModule,
   ],
 })
 export class AppModule {

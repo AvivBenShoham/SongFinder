@@ -3,12 +3,12 @@ import {
   Column,
   PrimaryGeneratedColumn,
   OneToMany,
-  JoinColumn,
   ManyToOne,
 } from 'typeorm';
 import { SongContributor } from '../songContributor/songContributor.entity';
 import { SongWord } from '../songWord/songWord.entity';
 import { Artist } from '../artist/artist.entity';
+import { SongPhrase } from '../songPhrase/songPhrase.entity';
 
 @Entity({ name: 'songs' })
 export class Song {
@@ -38,4 +38,7 @@ export class Song {
 
   @OneToMany(() => SongContributor, (contributor) => contributor.song)
   contributors: SongContributor[];
+
+  @OneToMany(() => SongPhrase, (songPhrase) => songPhrase.phrase)
+  phrases: SongPhrase[];
 }

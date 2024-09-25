@@ -9,6 +9,6 @@ import { WordController } from './word.controller';
   imports: [TypeOrmModule.forFeature([SongWord])],
   controllers: [SongWordController, WordController],
   providers: [SongWordService],
-  exports: [SongWordService],
+  exports: [SongWordService, TypeOrmModule],
 })
 export class SongWordModule {}

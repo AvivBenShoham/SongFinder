@@ -5,13 +5,29 @@ import CardContent from "@mui/material/CardContent";
 import Typography from "@mui/material/Typography";
 import { Menu, MenuItem, Stack } from "@mui/material";
 import AddCircleIcon from "@mui/icons-material/AddCircle";
+import httpClient from "../httpClient";
+import { useMutation } from "@tanstack/react-query";
 
-export default function SongCard({ lyrics = [] as string[][] }) {
+export interface SongCardProps {
+  lyrics: string[][];
+  songId: number;
+}
+
+export default function LyricsCard({
+  lyrics = [] as string[][],
+  songId,
+}: SongCardProps) {
   const [textSelection, setTextSelection] = React.useState("");
   const [contextMenu, setContextMenu] = React.useState<{
     mouseX: number;
     mouseY: number;
   } | null>(null);
+
+  const mutation = useMutation({
+    mutationFn: (songPhrase: { phrase: string; songId: number }) => {
+      return httpClient.post("/phrases", songPhrase);
+    },
+  });
 
   const handleContextMenu = (event: React.MouseEvent) => {
     event.preventDefault();
@@ -31,11 +47,10 @@ export default function SongCard({ lyrics = [] as string[][] }) {
     setContextMenu(null);
   };
 
-  const handleCreatePhrase = () => {
+  const handleCreatePhrase = async () => {
+    await mutation.mutateAsync({ phrase: textSelection, songId });
+
     handleClose();
-
-    // TODO: create phrase from the text selection
-
     setTextSelection("");
   };
 

@@ -48,7 +48,7 @@ export default function SongLyrics() {
       <Typography component="h2" variant="h6" sx={{ mb: 2 }}>
         {songData.name}
       </Typography>
-      <LyricsCard lyrics={songLyrics.lyrics} />
+      <LyricsCard lyrics={songLyrics.lyrics} songId={Number(params.songId)} />
     </Stack>
   );
 }

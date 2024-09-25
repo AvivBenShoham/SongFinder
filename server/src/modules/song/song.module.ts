@@ -16,6 +16,6 @@ import { ArtistModule } from '../artist/artist.module';
   ],
   controllers: [SongController],
   providers: [SongService],
-  exports: [SongService],
+  exports: [SongService, TypeOrmModule],
 })
 export class SongModule {}

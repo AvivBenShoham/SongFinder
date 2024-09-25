@@ -106,6 +106,20 @@ export class SongWordService {
     return songs;
   }
 
+  async getPhraseSongWords(songId: number, phrase: string) {
+    const words = phrase.split(' ').map(formatText);
+
+    const queryBuilder = this.songWordRepository
+      .createQueryBuilder('song_word')
+      .where('song_word.song = :songId', { songId })
+      .andWhere('song_word.word IN (:...words)', {
+        words,
+      })
+      .orderBy('song_word.row, song_word.col');
+
+    return queryBuilder.getMany();
+  }
+
   // only for internal backend usage
   async insert(songWord: SongWord): Promise<SongWord> {
     const newSongWord = this.songWordRepository.create(songWord);
