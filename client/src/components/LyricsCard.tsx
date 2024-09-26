@@ -6,17 +6,27 @@ import Typography from "@mui/material/Typography";
 import { Menu, MenuItem, Stack } from "@mui/material";
 import AddCircleIcon from "@mui/icons-material/AddCircle";
 import httpClient from "../httpClient";
-import { useMutation } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { SongLyrics } from "../routes/SongLyrics";
 
 export interface SongCardProps {
-  lyrics: string[][];
   songId: number;
+  hoveredMatch:
+    | { row: number; col: number; stanza: number; line: number }[]
+    | null;
 }
 
-export default function LyricsCard({
-  lyrics = [] as string[][],
-  songId,
-}: SongCardProps) {
+export default function LyricsCard({ songId, hoveredMatch }: SongCardProps) {
+  const {
+    data: { lyrics },
+  } = useQuery({
+    queryKey: ["songs", "lyrics", songId],
+    queryFn: async () =>
+      (await httpClient.get(`lyrics/${songId}`)).data as SongLyrics,
+    initialData: { lyrics: [] } as SongLyrics,
+  });
+
+  const queryClient = useQueryClient();
   const [textSelection, setTextSelection] = React.useState("");
   const [contextMenu, setContextMenu] = React.useState<{
     mouseX: number;
@@ -26,6 +36,11 @@ export default function LyricsCard({
   const mutation = useMutation({
     mutationFn: (songPhrase: { phrase: string; songId: number }) => {
       return httpClient.post("/phrases", songPhrase);
+    },
+    onSettled: async () => {
+      await queryClient.invalidateQueries({
+        queryKey: ["songs", "phrases", songId],
+      });
     },
   });
 
@@ -40,7 +55,12 @@ export default function LyricsCard({
         : null
     );
 
-    setTextSelection((window?.getSelection() || "").toString());
+    const newSelection = (window?.getSelection() || "")
+      ?.toString()
+      .replace(/\s+/g, " ")
+      .trim();
+
+    setTextSelection(newSelection);
   };
 
   const handleClose = () => {
@@ -54,107 +74,120 @@ export default function LyricsCard({
     setTextSelection("");
   };
 
+  const isWordInMatch = ({ stanzaIndex, lineIndex, col }) =>
+    (hoveredMatch || [])?.some(
+      (songWord) =>
+        songWord.col === col + 1 &&
+        songWord.line === lineIndex + 1 &&
+        songWord.stanza === stanzaIndex + 1
+    );
+
   return (
     <Card
       sx={{
         display: "flex",
         flex: "1",
+        overflowY: "auto",
       }}
     >
-      <Box
-        sx={{
-          display: "flex",
-          flexDirection: "column",
-          overflowY: "auto",
-          p: 1,
-        }}
-      >
-        <CardContent sx={{ flex: "1 0 auto" }}>
-          {lyrics.length > 0 ? (
-            <>
-              <Stack direction={"row"}>
-                <Typography
-                  variant="body2"
-                  sx={{
-                    color: "text.secondary",
-                    width: "60px",
-                    fontWeight: 600,
-                    textDecoration: "underline",
-                  }}
-                >
-                  Stanza
-                </Typography>
-                <Typography
-                  variant="body2"
-                  sx={{
-                    color: "text.secondary",
-                    width: "48px",
-                    fontWeight: 600,
-                    textDecoration: "underline",
-                  }}
-                >
-                  Line
-                </Typography>
-              </Stack>
-              {lyrics.map((stanza, stanzaIndex) => {
-                return (
-                  <>
-                    {stanza.map((line, lineIndex) => {
-                      return (
-                        <Stack direction={"row"} key={line + lineIndex}>
-                          <Typography
-                            variant="body2"
-                            sx={{
-                              color: "text.secondary",
-                              width: "60px",
-                            }}
-                          >
-                            {lineIndex === 0 && stanzaIndex + 1}
-                          </Typography>
-                          <Typography
-                            variant="body2"
-                            sx={{
-                              color: "text.secondary",
-                              width: "48px",
-                            }}
-                          >
-                            {lineIndex + 1}
-                          </Typography>
-                          <Typography
-                            variant="body1"
-                            onContextMenu={handleContextMenu}
-                            sx={{ cursor: "context-menu" }}
-                          >
-                            {line}
-                          </Typography>
-                        </Stack>
-                      );
-                    })}
-                    <Box key={stanzaIndex} sx={{ height: "16px" }} />
-                  </>
-                );
-              })}
-              <Menu
-                open={contextMenu !== null}
-                onClose={handleClose}
-                anchorReference="anchorPosition"
-                anchorPosition={
-                  contextMenu !== null
-                    ? { top: contextMenu.mouseY, left: contextMenu.mouseX }
-                    : undefined
-                }
+      <CardContent sx={{ flex: "1 0 auto" }}>
+        {lyrics.length > 0 ? (
+          <>
+            <Stack direction={"row"}>
+              <Typography
+                variant="body2"
+                sx={{
+                  color: "text.secondary",
+                  width: "60px",
+                  fontWeight: 600,
+                  textDecoration: "underline",
+                }}
               >
-                <MenuItem onClick={handleCreatePhrase}>
-                  <AddCircleIcon fontSize="small" sx={{ mr: 1 }} />
-                  Create Phrase: {textSelection}
-                </MenuItem>
-              </Menu>
-            </>
-          ) : (
-            <Typography variant="h4">No lyrics found</Typography>
-          )}
-        </CardContent>
-      </Box>
+                Stanza
+              </Typography>
+              <Typography
+                variant="body2"
+                sx={{
+                  color: "text.secondary",
+                  width: "48px",
+                  fontWeight: 600,
+                  textDecoration: "underline",
+                }}
+              >
+                Line
+              </Typography>
+            </Stack>
+            {lyrics.map((stanza, stanzaIndex) => {
+              return (
+                <>
+                  {stanza.map((line, lineIndex) => {
+                    return (
+                      <Stack direction={"row"} key={line + lineIndex}>
+                        <Typography
+                          variant="body2"
+                          sx={{
+                            color: "text.secondary",
+                            width: "60px",
+                          }}
+                        >
+                          {lineIndex === 0 && stanzaIndex + 1}
+                        </Typography>
+                        <Typography
+                          variant="body2"
+                          sx={{
+                            color: "text.secondary",
+                            width: "48px",
+                          }}
+                        >
+                          {lineIndex + 1}
+                        </Typography>
+                        <Stack direction={"row"} spacing={0.5}>
+                          {line.split(" ").map((word, col) => {
+                            return (
+                              <Typography
+                                variant="body1"
+                                onContextMenu={handleContextMenu}
+                                sx={{
+                                  cursor: "context-menu",
+                                  ...(isWordInMatch({
+                                    stanzaIndex,
+                                    lineIndex,
+                                    col,
+                                  }) && { bgcolor: "primary.main" }),
+                                }}
+                              >
+                                {word}
+                              </Typography>
+                            );
+                          })}
+                        </Stack>
+                      </Stack>
+                    );
+                  })}
+                  <Box key={stanzaIndex} sx={{ height: "16px" }} />
+                </>
+              );
+            })}
+            <Menu
+              open={contextMenu !== null}
+              onClose={handleClose}
+              anchorReference="anchorPosition"
+              anchorPosition={
+                contextMenu !== null
+                  ? { top: contextMenu.mouseY, left: contextMenu.mouseX }
+                  : undefined
+              }
+            >
+              <MenuItem onClick={handleCreatePhrase}>
+                <AddCircleIcon fontSize="small" sx={{ mr: 1 }} />
+                Create Phrase: {textSelection}
+              </MenuItem>
+            </Menu>
+          </>
+        ) : (
+          <Typography variant="h4">No lyrics found</Typography>
+        )}
+      </CardContent>
     </Card>
   );
 }

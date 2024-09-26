@@ -3,8 +3,9 @@ import Typography from "@mui/material/Typography";
 import { Stack } from "@mui/material";
 import { useQuery } from "@tanstack/react-query";
 import httpClient from "../httpClient";
-import { useParams, useSearchParams } from "react-router-dom";
+import { useParams } from "react-router-dom";
 import LyricsCard from "../components/LyricsCard";
+import PhrasesCard from "../components/PhrasesCard";
 
 export interface SongLyrics {
   lyrics: string[][];
@@ -21,13 +22,7 @@ export interface SongData {
 
 export default function SongLyrics() {
   const params = useParams();
-
-  const { data: songLyrics } = useQuery({
-    queryKey: ["songs", "lyrics", params.songId],
-    queryFn: async () =>
-      (await httpClient.get(`lyrics/${params.songId}`)).data as SongLyrics,
-    initialData: { lyrics: [] } as SongLyrics,
-  });
+  const [hoveredMatch, setHoveredMatch] = React.useState(null);
 
   const { data: songData } = useQuery({
     queryKey: ["songs", params.songId],
@@ -48,7 +43,25 @@ export default function SongLyrics() {
       <Typography component="h2" variant="h6" sx={{ mb: 2 }}>
         {songData.name}
       </Typography>
-      <LyricsCard lyrics={songLyrics.lyrics} songId={Number(params.songId)} />
+      <Stack
+        direction={"row"}
+        spacing={2}
+        sx={{
+          width: "100%",
+          height: "100%",
+          maxWidth: { sm: "100%", md: "1700px" },
+          overflow: "hidden",
+        }}
+      >
+        <LyricsCard
+          hoveredMatch={hoveredMatch}
+          songId={Number(params.songId)}
+        />
+        <PhrasesCard
+          setHoveredMatch={setHoveredMatch}
+          songId={Number(params.songId)}
+        />
+      </Stack>
     </Stack>
   );
 }

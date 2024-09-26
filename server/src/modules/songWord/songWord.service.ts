@@ -6,6 +6,7 @@ import { Song } from '../song/song.entity';
 import { SongWordOccurancies, songOccurancyDto } from './songWord.dto';
 import { formatText, getQueryParamList } from 'src/utils';
 import { GetSongWordsQueryParams } from './dtos';
+import * as _ from 'lodash';
 
 @Injectable()
 export class SongWordService {
@@ -131,9 +132,7 @@ export class SongWordService {
     return this.songWordRepository.save(newSongWords);
   }
 
-  // Response: array of stanzas according to lines
   convertSongWordsToLyrics(songWords: SongWord[]): string[][] {
-    // Sort songWords to ensure the correct order based on their properties
     songWords.sort((a, b) => {
       if (a.stanza !== b.stanza) return a.stanza - b.stanza;
       if (a.line !== b.line) return a.line - b.line;
@@ -141,42 +140,15 @@ export class SongWordService {
       return a.col - b.col;
     });
 
-    const stanzas: string[][] = [];
-    let currentStanza = 1;
-    let currentLine = 1;
-    let currentLineWords: string[] = [];
-    let currentStanzaLines: string[] = [];
-
-    songWords.forEach((songWord) => {
-      // Add a new stanza if needed
-      if (songWord.stanza > currentStanza) {
-        stanzas.push(currentStanzaLines);
-        currentStanza = songWord.stanza;
-        currentLine = 1;
-        currentLineWords = [];
-        currentStanzaLines = [];
-      }
-
-      // Add a new line if needed
-      if (songWord.line > currentLine) {
-        currentStanzaLines.push(currentLineWords.join(' '));
-        currentLineWords = [];
-        currentLine = songWord.line;
-      }
-
-      // Add the word to the current line
-      while (currentLineWords.length < songWord.col - 1) {
-        currentLineWords.push('');
-      }
-      currentLineWords[songWord.col - 1] = songWord.actualWord;
-    });
-
-    // Push the last line and stanza if they have content
-    if (currentLineWords.length > 0) {
-      stanzas.push(currentStanzaLines);
-    }
-
-    return stanzas;
+    return _.chain(songWords)
+      .groupBy('stanza')
+      .map((stanza) =>
+        _.chain(stanza)
+          .groupBy('line')
+          .map((words) => words.map((word) => word.actualWord).join(' '))
+          .value(),
+      )
+      .value();
   }
 
   convertLyricsToSongWords(lyrics: string, song: Song): SongWord[] {
