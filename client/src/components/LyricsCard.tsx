@@ -6,8 +6,9 @@ import Typography from "@mui/material/Typography";
 import { Menu, MenuItem, Stack } from "@mui/material";
 import AddCircleIcon from "@mui/icons-material/AddCircle";
 import httpClient from "../httpClient";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useQuery } from "@tanstack/react-query";
 import { SongLyrics } from "../routes/SongLyrics";
+import { useCreatePhraseMutation } from "../hooks";
 
 export interface SongCardProps {
   songId: number;
@@ -26,23 +27,13 @@ export default function LyricsCard({ songId, hoveredMatch }: SongCardProps) {
     initialData: { lyrics: [] } as SongLyrics,
   });
 
-  const queryClient = useQueryClient();
   const [textSelection, setTextSelection] = React.useState("");
   const [contextMenu, setContextMenu] = React.useState<{
     mouseX: number;
     mouseY: number;
   } | null>(null);
 
-  const mutation = useMutation({
-    mutationFn: (songPhrase: { phrase: string; songId: number }) => {
-      return httpClient.post("/phrases", songPhrase);
-    },
-    onSettled: async () => {
-      await queryClient.invalidateQueries({
-        queryKey: ["songs", "phrases", songId],
-      });
-    },
-  });
+  const mutation = useCreatePhraseMutation({ songId });
 
   const handleContextMenu = (event: React.MouseEvent) => {
     event.preventDefault();
@@ -68,13 +59,21 @@ export default function LyricsCard({ songId, hoveredMatch }: SongCardProps) {
   };
 
   const handleCreatePhrase = async () => {
-    await mutation.mutateAsync({ phrase: textSelection, songId });
+    await mutation.mutateAsync(textSelection);
 
     handleClose();
     setTextSelection("");
   };
 
-  const isWordInMatch = ({ stanzaIndex, lineIndex, col }) =>
+  const isWordInMatch = ({
+    stanzaIndex,
+    lineIndex,
+    col,
+  }: {
+    stanzaIndex: number;
+    lineIndex: number;
+    col: number;
+  }) =>
     (hoveredMatch || [])?.some(
       (songWord) =>
         songWord.col === col + 1 &&

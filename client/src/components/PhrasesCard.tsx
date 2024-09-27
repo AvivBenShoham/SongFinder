@@ -6,12 +6,14 @@ import {
   Accordion,
   AccordionDetails,
   AccordionSummary,
+  Button,
   Divider,
   Stack,
 } from "@mui/material";
 import httpClient from "../httpClient";
 import { useQuery } from "@tanstack/react-query";
 import { ArrowDropDownIcon } from "@mui/x-date-pickers";
+import CreatePhraseDialog from "./CreatePhraseDialog";
 
 export interface PhrasesCardProps {
   songId: number;
@@ -37,7 +39,14 @@ export default function PhrasesCard({
         overflowY: "auto",
       }}
     >
-      <Typography variant="h5">Phrases</Typography>
+      <Stack
+        direction={"row"}
+        justifyContent={"space-between"}
+        alignItems={"center"}
+      >
+        <Typography variant="h5">Phrases</Typography>
+        <CreatePhraseDialog songId={songId} />
+      </Stack>
       <CardContent sx={{ flex: "1 0 auto" }}>
         <Stack>
           {phrases.map(({ phrase, matches }) => {
@@ -48,7 +57,10 @@ export default function PhrasesCard({
                   aria-controls="panel2-content"
                   id="panel2-header"
                 >
-                  <Typography variant="h6">{phrase}</Typography>
+                  <Typography variant="h6">
+                    {" "}
+                    {`${phrase} (${matches.length})`}
+                  </Typography>
                 </AccordionSummary>
                 <AccordionDetails>
                   <Stack spacing={0.5}>

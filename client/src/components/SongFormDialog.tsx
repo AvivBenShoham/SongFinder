@@ -92,8 +92,7 @@ const SongFormDialog = () => {
 
   return (
     <React.Fragment>
-      <Button variant="contained" onClick={handleClickOpen}>
-        <Add />
+      <Button variant="contained" onClick={handleClickOpen} startIcon={<Add />}>
         Add new song
       </Button>
       <Dialog
