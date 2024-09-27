@@ -198,6 +198,7 @@ export class SongWordService {
     let currLine = 1;
     let currRow = 1;
     let currStanza = 1;
+
     lyrics.split('\n').forEach((line) => {
       // if the line is seperating between stanzas
       if (line === '') {
@@ -205,19 +206,24 @@ export class SongWordService {
         currLine = 1;
       } else {
         let currColl = 1;
-        line.split(' ').forEach((word) => {
-          const songWord: SongWord = {
-            actualWord: word,
-            word: formatText(word),
-            line: currLine,
-            stanza: currStanza,
-            col: currColl,
-            row: currRow,
-            song,
-          };
-          songWords.push(songWord);
-          currColl++;
-        });
+        line
+          .replace(/\s+/g, ' ')
+          .split(' ')
+          .forEach((word) => {
+            const songWord: SongWord = {
+              actualWord: word,
+              word: formatText(word),
+              line: currLine,
+              stanza: currStanza,
+              col: currColl,
+              row: currRow,
+              song,
+            };
+
+            songWords.push(songWord);
+            currColl++;
+          });
+
         currLine++;
       }
 

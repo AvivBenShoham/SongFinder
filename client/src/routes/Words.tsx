@@ -116,20 +116,13 @@ export default function Words() {
         />
         <Autocomplete
           label="Filter songs"
-          options={songs.map(({ name }) => name)}
-          value={searchParams
-            .getAll("songs")
-            .map(
-              (songId) =>
-                (songs || []).find((song) => song.id === Number(songId))?.name
-            )}
+          options={songs.map(({ id }) => id)}
+          value={searchParams.getAll("songs").map(Number)}
+          getOptionLabel={(songId) =>
+            songs.find((song) => song.id === songId)?.name || ""
+          }
           onChange={(_, newValue) => {
-            const newSongIds = newValue.map(
-              (songName: string) =>
-                songs.find((song) => song.name === songName)?.id
-            );
-
-            handleSearchParamsChange("songs", newSongIds);
+            handleSearchParamsChange("songs", newValue);
           }}
         />
         <Autocomplete
