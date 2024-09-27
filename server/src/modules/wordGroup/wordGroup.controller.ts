@@ -36,6 +36,25 @@ export class WordGroupController {
     return this.wordGroupService.insert(newGroupWord);
   }
 
+  @Post('/seed')
+  async seed() {
+    const groups = {
+      Food: ['Cake', 'Bread', 'Banana', 'Apple'],
+      Device: ['Phone', 'Computer', 'Airpods', 'Monitor', 'Speaker'],
+      Family: ['Man', 'Woman', 'Kid', 'Boy', 'Girl'],
+    };
+
+    return Promise.allSettled(
+      Object.entries(groups).map(([groupName, words]) => {
+        return Promise.allSettled(
+          words.map((word) =>
+            this.wordGroupService.insert({ groupName, word }),
+          ),
+        );
+      }),
+    );
+  }
+
   @Delete('/word')
   async removeWord(@Body() wordGroup: GroupDto) {
     return this.wordGroupService.remove(wordGroup);
