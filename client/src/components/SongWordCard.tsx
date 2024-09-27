@@ -45,7 +45,7 @@ export default function SongWordCard(props: SongWordCardProps) {
                   }
                   elevation={1}
                   sx={{
-                    minWidth: 200,
+                    minWidth: 260,
                     p: 1,
                     borderRadius: 1,
                     cursor: "pointer",
@@ -61,26 +61,24 @@ export default function SongWordCard(props: SongWordCardProps) {
                     <Typography
                       variant="subtitle1"
                       sx={{
-                        fontWeight: "600",
+                        fontWeight: 500,
                         color: "text.primary",
                         whiteSpace: "nowrap",
                         overflow: "hidden",
                         textOverflow: "ellipsis",
                       }}
                     >
-                      Song: {doc.songId}
+                      {doc.songName}
+                    </Typography>
+                    <Typography variant="body1">
+                      By: {doc.songArtist}
                     </Typography>
                     <Typography
-                      variant="body1"
+                      variant="body2"
                       sx={{ color: "text.secondary" }}
                     >
-                      row: {doc.row}, column: {doc.col}
-                    </Typography>
-                    <Typography
-                      variant="body1"
-                      sx={{ color: "text.secondary" }}
-                    >
-                      stanza: {doc.stanza}, line: {doc.line}
+                      stanza: {doc.stanza} | line: {doc.line} | row: {doc.row} |
+                      column: {doc.col}
                     </Typography>
                   </Stack>
                 </Paper>

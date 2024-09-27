@@ -1,7 +1,7 @@
-import { ApiProperty } from '@nestjs/swagger';
+import { ApiProperty, PickType } from '@nestjs/swagger';
 import { IsNotEmpty, IsString } from 'class-validator';
 
-export class createNewGroupName {
+export class GroupDto {
   @ApiProperty()
   @IsNotEmpty()
   @IsString()
@@ -12,3 +12,5 @@ export class createNewGroupName {
   @IsString()
   word: string;
 }
+
+export class DeleteGroupDto extends PickType(GroupDto, ['groupName']) {}

@@ -1,5 +1,14 @@
-import { Entity, PrimaryColumn, ManyToOne, JoinColumn, Column } from 'typeorm';
+import {
+  Entity,
+  PrimaryColumn,
+  ManyToOne,
+  JoinColumn,
+  Column,
+  ManyToMany,
+  JoinTable,
+} from 'typeorm';
 import { Song } from '../song/song.entity';
+import { WordGroup } from '../wordGroup/wordGroup.entity';
 
 @Entity({ name: 'song_words' })
 export class SongWord {

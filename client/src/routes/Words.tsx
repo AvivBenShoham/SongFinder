@@ -18,6 +18,8 @@ export interface SongWordResult {
     row: number;
     col: number;
     songId: number;
+    songName: string;
+    songArtist: string;
   }[];
 }
 
@@ -44,6 +46,25 @@ export default function Words() {
           `lyrics?page=${page}&pageSize=${rowsPerPage}&${queryString}`
         )
       ).data as SongWordResult[],
+    initialData: [],
+  });
+
+  const { data: groupsNames } = useQuery({
+    queryKey: ["groups"],
+    queryFn: async () =>
+      (await httpClient.get(`groups/names`)).data.map(
+        ({ groupName }: { groupName: string }) => groupName
+      ) as string[],
+    initialData: [],
+  });
+
+  const { data: songs } = useQuery({
+    queryKey: ["songs"],
+    queryFn: async () =>
+      (await httpClient.get(`songs/names`)).data as {
+        name: string;
+        id: number;
+      }[],
     initialData: [],
   });
 
@@ -95,16 +116,26 @@ export default function Words() {
         />
         <Autocomplete
           label="Filter songs"
-          freeSolo
-          value={searchParams.getAll("songs")}
-          onChange={(_, newValue) =>
-            handleSearchParamsChange("songs", newValue)
-          }
+          options={songs.map(({ name }) => name)}
+          value={searchParams
+            .getAll("songs")
+            .map(
+              (songId) =>
+                (songs || []).find((song) => song.id === Number(songId))?.name
+            )}
+          onChange={(_, newValue) => {
+            const newSongIds = newValue.map(
+              (songName: string) =>
+                songs.find((song) => song.name === songName)?.id
+            );
+
+            handleSearchParamsChange("songs", newSongIds);
+          }}
         />
         <Autocomplete
           label="Filter groups"
-          freeSolo
           value={searchParams.getAll("groups")}
+          options={groupsNames}
           onChange={(_, newValue) =>
             handleSearchParamsChange("groups", newValue)
           }

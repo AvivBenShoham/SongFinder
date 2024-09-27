@@ -40,6 +40,11 @@ export class SongController {
     };
   }
 
+  @Get('names')
+  async findSongsNames() {
+    return this.songService.findSongsNames();
+  }
+
   @Get('albums')
   async findAllAlbums() {
     return this.songService.findAllAlbums();

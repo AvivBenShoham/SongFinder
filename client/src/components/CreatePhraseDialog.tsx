@@ -4,26 +4,14 @@ import TextField from "@mui/material/TextField";
 import Dialog from "@mui/material/Dialog";
 import DialogActions from "@mui/material/DialogActions";
 import DialogContent from "@mui/material/DialogContent";
-import DialogContentText from "@mui/material/DialogContentText";
 import DialogTitle from "@mui/material/DialogTitle";
-import { Add, Delete } from "@mui/icons-material";
+import { Add } from "@mui/icons-material";
 import * as yup from "yup";
-import { Controller, useFieldArray, useForm } from "react-hook-form";
-import { DatePicker, LocalizationProvider } from "@mui/x-date-pickers";
+import { Controller, useForm } from "react-hook-form";
+import { LocalizationProvider } from "@mui/x-date-pickers";
 import { yupResolver } from "@hookform/resolvers/yup";
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import Grid from "@mui/material/Grid2";
-import {
-  FormControl,
-  FormHelperText,
-  IconButton,
-  InputLabel,
-  MenuItem,
-  Select,
-  Typography,
-} from "@mui/material";
-import { useMutation } from "@tanstack/react-query";
-import httpClient from "../httpClient";
 import { useCreatePhraseMutation } from "../hooks";
 
 const schema = yup.object().shape({

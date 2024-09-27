@@ -1,4 +1,5 @@
-import { Entity, PrimaryColumn } from 'typeorm';
+import { Entity, ManyToMany, PrimaryColumn } from 'typeorm';
+import { SongWord } from '../songWord/songWord.entity';
 
 @Entity({ name: 'word_group' })
 export class WordGroup {

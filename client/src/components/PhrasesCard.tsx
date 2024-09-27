@@ -58,7 +58,6 @@ export default function PhrasesCard({
                   id="panel2-header"
                 >
                   <Typography variant="h6">
-                    {" "}
                     {`${phrase} (${matches.length})`}
                   </Typography>
                 </AccordionSummary>

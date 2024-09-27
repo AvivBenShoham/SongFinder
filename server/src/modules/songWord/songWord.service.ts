@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { Repository } from 'typeorm';
+import { In, Repository } from 'typeorm';
 import { SongWord } from './songWord.entity';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Song } from '../song/song.entity';
@@ -7,16 +7,22 @@ import { SongWordOccurancies, songOccurancyDto } from './songWord.dto';
 import { formatText, getQueryParamList } from 'src/utils';
 import { GetSongWordsQueryParams } from './dtos';
 import * as _ from 'lodash';
+import { SongService } from '../song/song.service';
+import { WordGroupService } from '../wordGroup/wordGroup.service';
 
 @Injectable()
 export class SongWordService {
   constructor(
     @InjectRepository(SongWord)
     private songWordRepository: Repository<SongWord>,
+    @InjectRepository(Song)
+    private songRepository: Repository<Song>,
+    private wordGroupService: WordGroupService,
   ) {}
 
-  private buildSongWordsFilter(query: GetSongWordsQueryParams) {
+  private async buildSongWordsFilter(query: GetSongWordsQueryParams) {
     const songs = getQueryParamList(query.songs).map(formatText);
+    const groups = getQueryParamList(query.groups);
 
     const queryBuilder = this.songWordRepository
       .createQueryBuilder('song_word')
@@ -33,6 +39,19 @@ export class SongWordService {
 
     if (songs.length > 0) {
       queryBuilder.andWhere('song_word.song IN (:...songs)', { songs });
+    }
+
+    // TODO: CHECK IF CAN REFACTOR TO HANDLE THIS WITH JOIN
+    if (groups.length > 0) {
+      const groupsResult = await this.wordGroupService.findByGroupName(
+        ...groups,
+      );
+
+      const groupWords = groupsResult.map(({ word }) => word);
+
+      queryBuilder.andWhere('song_word.word IN (:...groupWords)', {
+        groupWords,
+      });
     }
 
     const positions = {
@@ -53,8 +72,8 @@ export class SongWordService {
     return queryBuilder;
   }
 
-  private buildSongWordsPagination(query: GetSongWordsQueryParams) {
-    const queryBuilder = this.buildSongWordsFilter(query);
+  private async buildSongWordsPagination(query: GetSongWordsQueryParams) {
+    const queryBuilder = await this.buildSongWordsFilter(query);
 
     if (query.page && query.pageSize) {
       queryBuilder
@@ -69,7 +88,7 @@ export class SongWordService {
   }
 
   async countSongWords(query: GetSongWordsQueryParams) {
-    const countQuery = this.buildSongWordsFilter(query).select(
+    const countQuery = (await this.buildSongWordsFilter(query)).select(
       'COUNT(DISTINCT song_word.word)',
       'count',
     );
@@ -79,7 +98,30 @@ export class SongWordService {
   }
 
   async findSongWords(query: GetSongWordsQueryParams) {
-    return this.buildSongWordsPagination(query).getRawMany();
+    const songWords = await (
+      await this.buildSongWordsPagination(query)
+    ).getRawMany();
+
+    const songIds = _.uniq(
+      songWords.flatMap(({ documents }) => documents.map((doc) => doc.songId)),
+    );
+
+    const songs = await this.songRepository.find({
+      where: { id: In(songIds) },
+      relations: ['artist'],
+      select: { id: true, name: true, artist: { name: true } },
+    });
+
+    const songsMap = _.keyBy(songs, 'id');
+
+    return songWords.map((songWord) => ({
+      ...songWord,
+      documents: songWord.documents.map((doc) => ({
+        ...doc,
+        songName: songsMap[doc.songId].name,
+        songArtist: songsMap[doc.songId].artist.name,
+      })),
+    }));
   }
 
   async findBySongId(id: number): Promise<SongWord[]> {

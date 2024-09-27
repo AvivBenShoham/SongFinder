@@ -87,6 +87,10 @@ export class SongService {
     return this.buildPaginationQuery(query).getManyAndCount();
   }
 
+  async findSongsNames() {
+    return this.songRepository.find({ select: { name: true, id: true } });
+  }
+
   async findOne(songId: number): Promise<Song> {
     return this.songRepository.findOneBy({ id: songId });
   }

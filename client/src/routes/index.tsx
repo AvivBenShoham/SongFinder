@@ -7,6 +7,7 @@ import AnalyticsRoundedIcon from "@mui/icons-material/AnalyticsRounded";
 import LayersOutlinedIcon from "@mui/icons-material/LayersOutlined";
 import FontDownloadRoundedIcon from "@mui/icons-material/FontDownloadRounded";
 import SongLyrics from "./SongLyrics";
+import Groups from "./Groups";
 
 export const AppRoutes = {
   Home: {
@@ -22,7 +23,7 @@ export const AppRoutes = {
   Groups: {
     path: "groups",
     icon: <LayersOutlinedIcon />,
-    element: <Home />,
+    element: <Groups />,
   },
   Statistics: {
     path: "statistics",

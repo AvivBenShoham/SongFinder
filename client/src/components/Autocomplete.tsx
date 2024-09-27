@@ -142,7 +142,10 @@ export interface CustomAutocompleteProps {
   isOptionEqualToValue?: (option: any, value: any) => boolean;
   freeSolo?: boolean;
   value?: any[];
-  onChange?: (event: Event, newValue: any) => void;
+  onChange?: (
+    event: React.SyntheticEvent<Element, Event>,
+    newValue: any
+  ) => void;
 }
 
 export default function CustomAutocomplete(props: CustomAutocompleteProps) {

@@ -8,18 +8,22 @@ import {
   Post,
 } from '@nestjs/common';
 import { WordGroupService } from './wordGroup.service';
-import { createNewGroupName } from './wordGroup.dto';
+import { DeleteGroupDto, GroupDto } from './wordGroup.dto';
 import { ApiTags } from '@nestjs/swagger';
 
-@Controller('wordGroups')
-@ApiTags('wordGroups')
+@Controller('groups')
+@ApiTags('Groups')
 export class WordGroupController {
   constructor(private readonly wordGroupService: WordGroupService) {}
-  //TODO: think if we want to support creating an empty wordGroup (and if so, how?)
 
   @Get('/')
   async findAll() {
     return this.wordGroupService.findAll();
+  }
+
+  @Get('/names')
+  async findGroupNames() {
+    return this.wordGroupService.findGroupNames();
   }
 
   @Get('/search/:wordGroup')
@@ -28,28 +32,17 @@ export class WordGroupController {
   }
 
   @Post()
-  async insertGroup(@Body() newGroupWord: createNewGroupName) {
+  async insertGroup(@Body() newGroupWord: GroupDto) {
     return this.wordGroupService.insert(newGroupWord);
   }
 
-  @Delete('/word/:wordGroup/:word')
-  async removeWord(
-    @Param('wordGroup') wordGroup: string,
-    @Param('word') word: string,
-  ) {
-    const result = await this.wordGroupService.remove(word, wordGroup);
-    if (result.affected === 0)
-      throw new NotFoundException(
-        `Couldn't find word ${word} with the group ${wordGroup}`,
-      );
-    return { success: true, affected: result.affected };
+  @Delete('/word')
+  async removeWord(@Body() wordGroup: GroupDto) {
+    return this.wordGroupService.remove(wordGroup);
   }
 
-  @Delete('/group/:group')
-  async deleteGroup(@Param('group') group: string) {
-    const result = await this.wordGroupService.deleteGroup(group);
-    if (result.affected === 0)
-      throw new NotFoundException(`Couldn't find group ${group}`);
-    return { success: true, affected: result.affected };
+  @Delete('')
+  async deleteGroup(@Body() deleteGroupDto: DeleteGroupDto) {
+    return this.wordGroupService.deleteGroup(deleteGroupDto.groupName);
   }
 }

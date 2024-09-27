@@ -1,7 +1,9 @@
 import { Injectable } from '@nestjs/common';
-import { DeleteResult, Repository } from 'typeorm';
+import { DeleteResult, In, Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
 import { WordGroup } from './wordGroup.entity';
+import { formatText } from 'src/utils';
+import { DeleteGroupDto, GroupDto } from './wordGroup.dto';
 
 @Injectable()
 export class WordGroupService {
@@ -11,21 +13,36 @@ export class WordGroupService {
   ) {}
 
   async findAll(): Promise<WordGroup[]> {
-    return this.wordGroupRepository.find();
+    return this.wordGroupRepository
+      .createQueryBuilder('group')
+      .select('group.groupName', 'groupName')
+      .addSelect('array_agg(group.word)', 'words')
+      .groupBy('group.groupName')
+      .getRawMany();
   }
 
-  async findByGroupName(groupName: string): Promise<WordGroup[]> {
-    return this.wordGroupRepository.findBy({ groupName });
+  async findGroupNames() {
+    return this.wordGroupRepository
+      .createQueryBuilder('group')
+      .select('DISTINCT group.groupName', 'groupName')
+      .getRawMany();
   }
 
-  // only for internal backend usage
-  async insert(songWord: WordGroup): Promise<WordGroup> {
-    const newSongWord = this.wordGroupRepository.create(songWord);
-    return this.wordGroupRepository.save(newSongWord);
+  async findByGroupName(...groupNames: string[]): Promise<WordGroup[]> {
+    return this.wordGroupRepository.findBy({ groupName: In(groupNames) });
   }
 
-  async remove(word: string, groupName: string): Promise<DeleteResult> {
-    return this.wordGroupRepository.delete({ word, groupName });
+  async insert(group: GroupDto): Promise<WordGroup> {
+    const newGroup = this.wordGroupRepository.create({
+      groupName: group.groupName,
+      word: formatText(group.word),
+    });
+
+    return this.wordGroupRepository.save(newGroup);
+  }
+
+  async remove(group: DeleteGroupDto): Promise<DeleteResult> {
+    return this.wordGroupRepository.delete(group);
   }
 
   async deleteGroup(groupName: string): Promise<DeleteResult> {

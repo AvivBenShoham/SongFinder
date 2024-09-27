@@ -21,21 +21,35 @@ export class SongPhraseService {
     return this.songPhraseRepository.find();
   }
 
-  private findPhraseOccurrences(songWords: SongWord[], phrase: string) {
+  private findPhraseMatches(songWords: SongWord[], phrase: string) {
     const phraseWords = phrase.split(' ').map(formatText);
     const cleanPhrase = phraseWords.join(' ');
     const phraseLength = phraseWords.length;
-    const occurrences = [];
+    const matches = [];
 
     for (let i = 0; i <= songWords.length - phraseLength; i++) {
       const segment = songWords.slice(i, i + phraseLength);
 
       if (segment.map(({ word }) => word).join(' ') === cleanPhrase) {
-        occurrences.push(segment);
+        let sequence = true;
+
+        for (let i = 0; i < segment.length - 1; i++) {
+          if (
+            segment[i].row !== segment[i + 1].row ||
+            segment[i].col + 1 !== segment[i + 1].col
+          ) {
+            sequence = false;
+            break;
+          }
+        }
+
+        if (sequence) {
+          matches.push(segment);
+        }
       }
     }
 
-    return occurrences;
+    return matches;
   }
 
   async findAllBySongId(songId: number) {
@@ -58,7 +72,7 @@ export class SongPhraseService {
 
     return phraseWords.map(({ phrase, songWords }) => ({
       phrase,
-      matches: this.findPhraseOccurrences(songWords, phrase),
+      matches: this.findPhraseMatches(songWords, phrase),
     }));
   }
 
