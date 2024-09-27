@@ -4,6 +4,7 @@ import CardContent from "@mui/material/CardContent";
 import Typography from "@mui/material/Typography";
 import { SongWordResult } from "../routes/Words";
 import { Paper, Stack } from "@mui/material";
+import { Link } from "react-router-dom";
 
 interface SongWordCardProps extends SongWordResult {
   onClick?: (wordDoc: any) => void;

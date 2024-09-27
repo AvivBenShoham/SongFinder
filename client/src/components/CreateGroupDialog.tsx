@@ -5,7 +5,7 @@ import Dialog from "@mui/material/Dialog";
 import DialogActions from "@mui/material/DialogActions";
 import DialogContent from "@mui/material/DialogContent";
 import DialogTitle from "@mui/material/DialogTitle";
-import { Add, Delete } from "@mui/icons-material";
+import { Add, Delete, GroupAdd, LibraryAdd } from "@mui/icons-material";
 import * as yup from "yup";
 import { Controller, useFieldArray, useForm } from "react-hook-form";
 import { LocalizationProvider } from "@mui/x-date-pickers";
@@ -68,7 +68,11 @@ const CreateGroupDialog = () => {
 
   return (
     <React.Fragment>
-      <Button variant="outlined" onClick={handleClickOpen} startIcon={<Add />}>
+      <Button
+        variant="outlined"
+        onClick={handleClickOpen}
+        startIcon={<LibraryAdd />}
+      >
         Create Group
       </Button>
       <Dialog
