@@ -2,7 +2,7 @@ import * as React from "react";
 import Grid from "@mui/material/Grid2";
 import Typography from "@mui/material/Typography";
 import Autocomplete from "../components/Autocomplete";
-import { Pagination, Stack } from "@mui/material";
+import { Pagination, Stack, TextField } from "@mui/material";
 import { useQuery } from "@tanstack/react-query";
 import httpClient from "../httpClient";
 import { useNavigate, useSearchParams } from "react-router-dom";
@@ -131,6 +131,38 @@ export default function Words() {
           options={groupsNames}
           onChange={(_, newValue) =>
             handleSearchParamsChange("groups", newValue)
+          }
+        />
+        <TextField
+          label="Stanza"
+          value={searchParams.get("stanza")}
+          type="number"
+          onChange={(event) =>
+            handleSearchParamsChange("stanza", event.target.value)
+          }
+        />
+        <TextField
+          label="Line"
+          value={searchParams.get("line")}
+          type="number"
+          onChange={(event) =>
+            handleSearchParamsChange("line", event.target.value)
+          }
+        />
+        <TextField
+          label="Row"
+          value={searchParams.get("row")}
+          type="number"
+          onChange={(event) =>
+            handleSearchParamsChange("row", event.target.value)
+          }
+        />
+        <TextField
+          label="Column"
+          value={searchParams.get("col")}
+          type="number"
+          onChange={(event) =>
+            handleSearchParamsChange("col", event.target.value)
           }
         />
       </Stack>
