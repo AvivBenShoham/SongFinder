@@ -9,6 +9,8 @@ import httpClient from "../httpClient";
 import { useQuery } from "@tanstack/react-query";
 import { SongLyrics } from "../routes/SongLyrics";
 import { useCreatePhraseMutation } from "../hooks";
+import { useSearchParams } from "react-router-dom";
+import { formatText } from "../utils";
 
 export interface SongCardProps {
   songId: number;
@@ -34,6 +36,9 @@ export default function LyricsCard({ songId, hoveredMatch }: SongCardProps) {
   } | null>(null);
 
   const mutation = useCreatePhraseMutation({ songId });
+  const [searchParams] = useSearchParams();
+
+  console.log(searchParams.get("word"));
 
   const handleContextMenu = (event: React.MouseEvent) => {
     event.preventDefault();
@@ -80,6 +85,8 @@ export default function LyricsCard({ songId, hoveredMatch }: SongCardProps) {
         songWord.line === lineIndex + 1 &&
         songWord.stanza === stanzaIndex + 1
     );
+
+  const selectedWord = searchParams.get("word");
 
   return (
     <Card
@@ -152,7 +159,17 @@ export default function LyricsCard({ songId, hoveredMatch }: SongCardProps) {
                                     stanzaIndex,
                                     lineIndex,
                                     col,
-                                  }) && { bgcolor: "primary.main" }),
+                                  }) && {
+                                    bgcolor: "primary.main",
+                                    color: "primary.contrastText",
+                                    fontWeight: 600,
+                                  }),
+                                  ...(selectedWord &&
+                                    formatText(word) ===
+                                      formatText(selectedWord as string) && {
+                                      fontWeight: 700,
+                                      textDecoration: "underline",
+                                    }),
                                 }}
                               >
                                 {word}

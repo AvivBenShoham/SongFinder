@@ -6,7 +6,7 @@ import DialogActions from "@mui/material/DialogActions";
 import DialogContent from "@mui/material/DialogContent";
 import DialogContentText from "@mui/material/DialogContentText";
 import DialogTitle from "@mui/material/DialogTitle";
-import { Add, Delete } from "@mui/icons-material";
+import { Add, Delete, FileUpload } from "@mui/icons-material";
 import * as yup from "yup";
 import { Controller, useFieldArray, useForm } from "react-hook-form";
 import { DatePicker, LocalizationProvider } from "@mui/x-date-pickers";
@@ -24,6 +24,7 @@ import {
 } from "@mui/material";
 import { useMutation } from "@tanstack/react-query";
 import httpClient from "../httpClient";
+import { VisuallyHiddenInput } from "./VisuallyHiddenInput";
 
 const contributorTypes = ["producer", "singer", "writer", "compositor"];
 
@@ -59,13 +60,14 @@ interface SongFormData {
 
 const SongFormDialog = () => {
   const [open, setOpen] = React.useState(false);
+
   const mutation = useMutation({
     mutationFn: (newSong: SongFormData) => {
       return httpClient.post("/songs", newSong);
     },
   });
 
-  const { control, handleSubmit } = useForm({
+  const { control, handleSubmit, setValue } = useForm({
     resolver: yupResolver(schema),
     defaultValues: {
       contributors: [],
@@ -76,6 +78,22 @@ const SongFormDialog = () => {
     control,
     name: "contributors",
   });
+
+  const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event?.target?.files?.[0];
+
+    if (file) {
+      const reader = new FileReader();
+
+      reader.onload = (e: ProgressEvent<FileReader>) => {
+        const content = e?.target?.result?.toString() || "";
+
+        setValue("lyrics", content);
+      };
+
+      reader.readAsText(file);
+    }
+  };
 
   const handleClickOpen = () => {
     setOpen(true);
@@ -105,6 +123,22 @@ const SongFormDialog = () => {
       >
         <LocalizationProvider dateAdapter={AdapterDayjs}>
           <DialogTitle>Add New Song</DialogTitle>
+          <Button
+            component="label"
+            role={undefined}
+            variant="contained"
+            color="secondary"
+            tabIndex={-1}
+            startIcon={<FileUpload />}
+            sx={{ width: "50%", alignSelf: "center" }}
+          >
+            Upload Lyrics File
+            <VisuallyHiddenInput
+              type="file"
+              onChange={handleFileChange}
+              accept=".txt"
+            />
+          </Button>
           <DialogContent>
             <DialogContentText>Fill the song details:</DialogContentText>
             <Grid container spacing={2} marginY={1}>
@@ -293,7 +327,9 @@ const SongFormDialog = () => {
           </DialogContent>
           <DialogActions>
             <Button onClick={handleClose}>Cancel</Button>
-            <Button type="submit">Submit</Button>
+            <Button type="submit" variant="contained">
+              Submit
+            </Button>
           </DialogActions>
         </LocalizationProvider>
       </Dialog>

@@ -181,7 +181,7 @@ export default function Words() {
             key={songWord.word}
             {...songWord}
             onClick={(wordDoc) => {
-              navigate(`/lyrics/${wordDoc.songId}`);
+              navigate(`/lyrics/${wordDoc.songId}?word=${songWord.word}`);
             }}
           />
         ))}

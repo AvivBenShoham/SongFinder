@@ -116,6 +116,11 @@ export default function Groups() {
                       sx={{ margin: 0.5 }}
                       size="medium"
                       onDelete={() => handleRemoveGroupWord(groupName, word)}
+                      onClick={() =>
+                        navigate(
+                          `/${AppRoutes.Words.path}?groups=${groupName}&word=${word}`
+                        )
+                      }
                     />
                   ))}
                 </Stack>

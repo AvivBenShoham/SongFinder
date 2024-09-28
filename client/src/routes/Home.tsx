@@ -125,7 +125,8 @@ export default function Home() {
             label="Filter by date"
             slotProps={{ textField: { size: "small" } }}
             sx={{ minWidth: 200 }}
-            value={dayjs(searchParams.get("date") || new Date())}
+            value={dayjs(searchParams.get("date") || "")}
+            format="DD/MM/YYYY"
             onChange={(newValue) => handleSearchParamsChange("date", newValue)}
           />
         </LocalizationProvider>{" "}

@@ -92,7 +92,10 @@ export class SongService {
   }
 
   async findOne(songId: number): Promise<Song> {
-    return this.songRepository.findOneBy({ id: songId });
+    return this.songRepository.findOne({
+      where: { id: songId },
+      relations: ['artist'],
+    });
   }
 
   async findByName(songName: string): Promise<Song[]> {
