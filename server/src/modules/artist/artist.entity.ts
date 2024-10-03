@@ -21,6 +21,6 @@ export class Artist {
   @OneToMany(() => SongContributor, (contributor) => contributor.artist)
   contributions: SongContributor[];
 
-  @OneToMany(() => Song, (song) => song.id)
+  @OneToMany(() => Song, (song) => song.artist)
   songs: Song[];
 }

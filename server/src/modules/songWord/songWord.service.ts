@@ -7,7 +7,6 @@ import { SongWordOccurancies, songOccurancyDto } from './songWord.dto';
 import { formatText, getQueryParamList } from 'src/utils';
 import { GetSongWordsQueryParams } from './dtos';
 import * as _ from 'lodash';
-import { SongService } from '../song/song.service';
 import { WordGroupService } from '../wordGroup/wordGroup.service';
 
 @Injectable()
@@ -282,5 +281,29 @@ export class SongWordService {
         releaseDate: songWord.song.releaseDate,
       },
     };
+  }
+
+  async getWordsWithMostAppearances(): Promise<
+    [{ word: string; count: number }]
+  > {
+    const result = this.songWordRepository
+      .createQueryBuilder('song_word')
+      .select('song_word.word', 'word')
+      .addSelect('COUNT(song_word.word)', 'count')
+      .groupBy('song_word.word')
+      .orderBy('count', 'DESC')
+      .limit(5)
+      .execute();
+
+    return result;
+  }
+
+  async getTotalWords(): Promise<number> {
+    const result = await this.songWordRepository
+      .createQueryBuilder('song_word')
+      .select('COUNT(song_word.actual_word)', 'count')
+      .getRawOne();
+
+    return parseInt(result.count);
   }
 }

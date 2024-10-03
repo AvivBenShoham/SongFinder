@@ -4,6 +4,7 @@ import {
   PrimaryGeneratedColumn,
   OneToMany,
   ManyToOne,
+  JoinColumn,
 } from 'typeorm';
 import { SongContributor } from '../songContributor/songContributor.entity';
 import { SongWord } from '../songWord/songWord.entity';
@@ -31,6 +32,7 @@ export class Song {
   coverUrl: URL;
 
   @ManyToOne(() => Artist, (artist) => artist.name)
+  @JoinColumn()
   artist: Artist;
 
   @OneToMany(() => SongWord, (songWord) => songWord.song)
