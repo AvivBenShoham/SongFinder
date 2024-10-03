@@ -204,4 +204,8 @@ export class SongService {
       throw error;
     }
   }
+
+  async getTotalSongs(): Promise<number> {
+    return this.songRepository.count();
+  }
 }

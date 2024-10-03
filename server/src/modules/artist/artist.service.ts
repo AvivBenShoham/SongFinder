@@ -1,9 +1,8 @@
-import { Injectable, Logger } from '@nestjs/common';
-import { In, Like, Repository, createQueryBuilder } from 'typeorm';
+import { Injectable } from '@nestjs/common';
+import { In, Repository } from 'typeorm';
 import { Artist } from './artist.entity';
 import { InjectRepository } from '@nestjs/typeorm';
 import { createArtistDto } from './artist.dto';
-import { formatText, getQueryParamList } from 'src/utils';
 import { GetArtistsQueryParams } from './dtos';
 
 interface HasArtistName {
@@ -77,5 +76,32 @@ export class ArtistService {
     const artistsNames = artists.map((artist) => artist.name);
 
     return names.every((name) => artistsNames.includes(name));
+  }
+
+  async getArtistWithMostSongs(): Promise<
+    [
+      {
+        artistName: string;
+        artistImageUrl: URL;
+        count: number;
+      },
+    ]
+  > {
+    const result = await this.artistRepository
+      .createQueryBuilder('artist')
+      .leftJoinAndSelect('artist.songs', 'song')
+      .select('artist.name as artistName')
+      .addSelect('artist.imageUrl as artistImageUrl')
+      .addSelect('COUNT(song.id)', 'count')
+      .groupBy('artist.name, artist.imageUrl')
+      .orderBy('COUNT(song.id)', 'DESC')
+      .limit(10)
+      .execute();
+
+    return result;
+  }
+
+  async getTotalArtists(): Promise<number> {
+    return this.artistRepository.count();
   }
 }

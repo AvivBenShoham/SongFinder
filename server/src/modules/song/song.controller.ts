@@ -158,11 +158,13 @@ export class SongController {
             artistName: artist?.name,
             type: 'singer',
           })),
-        ];
+        ].filter((contributer) => {
+          return contributer.artistName !== songData?.primary_artist?.name;
+        });
 
         return {
           name: songData?.title,
-          artist: songData?.primary_artist?.name,
+          artistName: songData?.primary_artist?.name,
           artistImageUrl: songData?.primary_artist?.image_url,
           album: songData?.album?.name || songData?.title,
           releaseDate: songData?.release_date_for_display,
@@ -175,9 +177,14 @@ export class SongController {
 
     Logger.log(`Start seeding ${songs.length} songs`);
 
-    await Promise.allSettled(
-      songs.map((song) => this.songService.create(song)),
-    );
+    for (const song of songs) {
+      try {
+        await this.songService.create(song);
+      } catch (err) {
+        Logger.error(`Error seeding song: ${song.name}`);
+        Logger.error(err);
+      }
+    }
 
     Logger.log(`Seed finished :)`);
   }

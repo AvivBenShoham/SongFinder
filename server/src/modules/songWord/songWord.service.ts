@@ -7,7 +7,6 @@ import { SongWordOccurancies, songOccurancyDto } from './songWord.dto';
 import { formatText, getQueryParamList } from 'src/utils';
 import { GetSongWordsQueryParams } from './dtos';
 import * as _ from 'lodash';
-import { SongService } from '../song/song.service';
 import { WordGroupService } from '../wordGroup/wordGroup.service';
 
 @Injectable()
@@ -77,7 +76,20 @@ export class SongWordService {
 
     if (query.page && query.pageSize) {
       queryBuilder
-        .addSelect(`JSON_AGG(song_word)`, 'documents')
+        .addSelect(
+          `JSON_AGG(
+            JSON_BUILD_OBJECT(
+              'word', song_word.word,
+              'actualWord', song_word.actual_word,
+              'row', song_word.row,
+              'col', song_word.col,
+              'line', song_word.line,
+              'stanza', song_word.stanza,
+              'songId', song_word.song_id
+            )
+          )`,
+          'documents',
+        )
         .groupBy('song_word.word')
         .orderBy('song_word.word')
         .skip((query.page - 1) * query.pageSize)
@@ -218,6 +230,7 @@ export class SongWordService {
               col: currColl,
               row: currRow,
               song,
+              songId: song.id,
             };
 
             songWords.push(songWord);
@@ -268,5 +281,29 @@ export class SongWordService {
         releaseDate: songWord.song.releaseDate,
       },
     };
+  }
+
+  async getWordsWithMostAppearances(): Promise<
+    [{ word: string; count: number }]
+  > {
+    const result = this.songWordRepository
+      .createQueryBuilder('song_word')
+      .select('song_word.word', 'word')
+      .addSelect('COUNT(song_word.word)', 'count')
+      .groupBy('song_word.word')
+      .orderBy('count', 'DESC')
+      .limit(5)
+      .execute();
+
+    return result;
+  }
+
+  async getTotalWords(): Promise<number> {
+    const result = await this.songWordRepository
+      .createQueryBuilder('song_word')
+      .select('COUNT(song_word.actual_word)', 'count')
+      .getRawOne();
+
+    return parseInt(result.count);
   }
 }
