@@ -1,14 +1,5 @@
-import {
-  Entity,
-  PrimaryColumn,
-  ManyToOne,
-  JoinColumn,
-  Column,
-  ManyToMany,
-  JoinTable,
-} from 'typeorm';
+import { Entity, PrimaryColumn, ManyToOne, JoinColumn } from 'typeorm';
 import { Song } from '../song/song.entity';
-import { WordGroup } from '../wordGroup/wordGroup.entity';
 
 @Entity({ name: 'song_words' })
 export class SongWord {
@@ -18,7 +9,11 @@ export class SongWord {
   @PrimaryColumn({ type: 'varchar', length: 100, name: 'actual_word' })
   actualWord: string;
 
+  @PrimaryColumn({ type: 'int', name: 'song_id' })
+  songId: number;
+
   @ManyToOne(() => Song, (song) => song.id)
+  @JoinColumn({ name: 'song_id' })
   song: Song;
 
   @PrimaryColumn({ type: 'int' })

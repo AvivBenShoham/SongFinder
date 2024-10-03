@@ -77,7 +77,20 @@ export class SongWordService {
 
     if (query.page && query.pageSize) {
       queryBuilder
-        .addSelect(`JSON_AGG(song_word)`, 'documents')
+        .addSelect(
+          `JSON_AGG(
+            JSON_BUILD_OBJECT(
+              'word', song_word.word,
+              'actualWord', song_word.actual_word,
+              'row', song_word.row,
+              'col', song_word.col,
+              'line', song_word.line,
+              'stanza', song_word.stanza,
+              'songId', song_word.song_id
+            )
+          )`,
+          'documents',
+        )
         .groupBy('song_word.word')
         .orderBy('song_word.word')
         .skip((query.page - 1) * query.pageSize)
@@ -218,6 +231,7 @@ export class SongWordService {
               col: currColl,
               row: currRow,
               song,
+              songId: song.id,
             };
 
             songWords.push(songWord);
