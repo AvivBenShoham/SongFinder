@@ -1,15 +1,19 @@
-import { Entity, PrimaryColumn, ManyToOne, JoinColumn } from 'typeorm';
+import { Entity, PrimaryColumn, ManyToOne, JoinColumn, Index } from 'typeorm';
 import { Song } from '../song/song.entity';
 
 @Entity({ name: 'song_words' })
+@Index(['songId', 'line'])
+@Index(['songId', 'stanza'])
 export class SongWord {
   @PrimaryColumn({ type: 'varchar', length: 100 })
+  @Index()
   word: string;
 
   @PrimaryColumn({ type: 'varchar', length: 100, name: 'actual_word' })
   actualWord: string;
 
   @PrimaryColumn({ type: 'int', name: 'song_id' })
+  @Index()
   songId: number;
 
   @ManyToOne(() => Song, (song) => song.id)
