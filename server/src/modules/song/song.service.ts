@@ -148,16 +148,6 @@ export class SongService {
       .getRawMany();
   }
 
-  private async startTransaction(queryRunner: Map<string, QueryRunner>) {
-    return Promise.all(
-      Array.from(queryRunner.values()).map(async (runner) => {
-        console.log('Runner', runner);
-        await runner.connect();
-        await runner.startTransaction();
-      }),
-    );
-  }
-
   public async create(createSongDto: createSongReqDto) {
     Logger.debug(`'Trying to create: ${JSON.stringify(createSongDto)}`);
 
@@ -168,7 +158,6 @@ export class SongService {
     const isAlreadyExists =
       await this.findSongByNameAndContributors(createSongDto);
 
-    //TODO: add transactions
     if (isAlreadyExists)
       throw new BadRequestException('the song already exists');
 
