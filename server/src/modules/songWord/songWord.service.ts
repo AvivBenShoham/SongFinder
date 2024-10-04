@@ -286,13 +286,13 @@ export class SongWordService {
   async getWordsWithMostAppearances(): Promise<
     [{ word: string; count: number }]
   > {
-    const result = this.songWordRepository
+    const result = await this.songWordRepository
       .createQueryBuilder('song_word')
-      .select('song_word.word', 'word')
-      .addSelect('COUNT(song_word.word)', 'count')
+      .select('song_word.word', 'text')
+      .addSelect('COUNT(song_word.word)::integer', 'size')
       .groupBy('song_word.word')
-      .orderBy('count', 'DESC')
-      .limit(5)
+      .orderBy('size', 'DESC')
+      .limit(50)
       .execute();
 
     return result;

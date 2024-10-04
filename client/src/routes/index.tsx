@@ -37,8 +37,8 @@ export const AppRouter = () => (
   <BrowserRouter>
     <Routes>
       <Route path="/" element={<Root />}>
-        {Object.values(AppRoutes).map((route) => (
-          <Route path={route.path} element={route.element} />
+        {Object.values(AppRoutes).map((route, index) => (
+          <Route path={route.path} element={route.element} key={index} />
         ))}
         <Route path={"lyrics/:songId"} element={<SongLyrics />} />
         <Route path="" element={<Navigate to="home" />} />

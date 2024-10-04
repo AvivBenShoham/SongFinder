@@ -1,19 +1,22 @@
 import * as React from "react";
 import Typography from "@mui/material/Typography";
-import { Stack } from "@mui/material";
+import { Box, Stack } from "@mui/material";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import httpClient from "../httpClient";
 import { useNavigate } from "react-router-dom";
+import NumberedStatCard from "../components/NumberedStatCard";
+import ArtistTable from "../components/ArtistTable";
+import WordCloud from "../components/WordCloud";
 
 export default function Statistics() {
   const navigate = useNavigate();
-  const { data: groups } = useQuery({
+  const { data: {counts, wordsWithMostAppearances } } = useQuery({
     queryKey: ["statistics"],
     queryFn: async () => (await httpClient.get(`statistics`)).data,
-    initialData: [],
+    initialData: { counts: { songs: 0, artists: 0, words: 0 }, wordsWithMostAppearances: [] },
   });
 
-  const queryClient = useQueryClient();
+  console.log(counts)
 
   return (
     <Stack
@@ -33,7 +36,19 @@ export default function Statistics() {
           Statistics
         </Typography>
       </Stack>
-      <Stack marginY={2}></Stack>
+      <Stack
+        direction={{ xs: "column", sm: "column", md: "row" }}
+        spacing={{ md: 3, sm: 1, xs: 1 }}
+        justifyContent={"center"}
+      >
+        <NumberedStatCard name="Songs" count={counts?.songs} />
+        <NumberedStatCard name="Words" count={counts?.words} />
+        <NumberedStatCard name="Artists" count={counts?.artists} />
+      </Stack>
+      <Stack direction="row" justifyContent="space-evenly" paddingTop="1rem">
+        <ArtistTable artistCount={counts?.artists}/>
+        <WordCloud words={wordsWithMostAppearances} height={400} width={400} />
+      </Stack>
     </Stack>
   );
 }

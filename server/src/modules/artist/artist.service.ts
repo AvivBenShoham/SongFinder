@@ -78,25 +78,28 @@ export class ArtistService {
     return names.every((name) => artistsNames.includes(name));
   }
 
-  async getArtistWithMostSongs(): Promise<
-    [
-      {
-        artistName: string;
-        artistImageUrl: URL;
-        count: number;
-      },
-    ]
+  async getArtistWithMostSongs(
+    page: number,
+    pageSize: number,
+  ): Promise<
+    {
+      artistName: string;
+      artistImageUrl: URL;
+      count: number;
+    }[]
   > {
     const result = await this.artistRepository
       .createQueryBuilder('artist')
       .leftJoinAndSelect('artist.songs', 'song')
-      .select('artist.name as artistName')
-      .addSelect('artist.imageUrl as artistImageUrl')
-      .addSelect('COUNT(song.id)', 'count')
+      .select('artist.name', 'artistName')
+      .addSelect('artist.imageUrl', 'artistImageUrl')
+      .addSelect('COUNT(DISTINCT song.id)', 'count')
       .groupBy('artist.name, artist.imageUrl')
-      .orderBy('COUNT(song.id)', 'DESC')
-      .limit(10)
-      .execute();
+      .orderBy('COUNT(DISTINCT song.id)', 'DESC')
+      .addOrderBy('artist.name', 'ASC')
+      .offset(pageSize * (page - 1))
+      .limit(pageSize)
+      .getRawMany();
 
     return result;
   }
