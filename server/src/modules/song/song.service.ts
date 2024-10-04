@@ -1,19 +1,22 @@
 import { BadRequestException, Injectable, Logger } from '@nestjs/common';
 import {
-  In,
   Repository,
-  MoreThanOrEqual,
   SelectQueryBuilder,
-  InsertResult,
+  QueryRunner,
+  DeepPartial,
+  Connection,
 } from 'typeorm';
 import { Song } from './song.entity';
-import { InjectRepository } from '@nestjs/typeorm';
+import { InjectConnection, InjectRepository } from '@nestjs/typeorm';
 import createSongReqDto, { createSongDto } from './song.dto';
 import { formatText, getQueryParamList } from 'src/utils';
 import { GetSongsQueryParams } from './dtos';
 import { SongWordService } from '../songWord/songWord.service';
 import { ArtistService } from '../artist/artist.service';
 import { SongContributorService } from '../songContributor/songContributor.service';
+import { Artist } from '../artist/artist.entity';
+import { SongContributor } from '../songContributor/songContributor.entity';
+import { SongWord } from '../songWord/songWord.entity';
 
 @Injectable()
 export class SongService {
@@ -23,6 +26,7 @@ export class SongService {
     private readonly songWordService: SongWordService,
     private readonly artistService: ArtistService,
     private readonly contributorService: SongContributorService,
+    @InjectConnection() private readonly connection: Connection,
   ) {}
 
   private buildPaginationQuery(
@@ -147,45 +151,52 @@ export class SongService {
   public async create(createSongDto: createSongReqDto) {
     Logger.debug(`'Trying to create: ${JSON.stringify(createSongDto)}`);
 
+    const queryRunner = this.connection.createQueryRunner();
+    await queryRunner.connect();
+    await queryRunner.startTransaction();
+
     const isAlreadyExists =
       await this.findSongByNameAndContributors(createSongDto);
 
-    //TODO: add transactions
     if (isAlreadyExists)
       throw new BadRequestException('the song already exists');
 
-    const artists = [
-      ...createSongDto.contributors.map((artist) => ({
-        artistName: artist.artistName,
-        imageUrl: '',
-      })),
-      {
-        artistName: createSongDto?.artistName,
-        imageUrl: createSongDto?.artistImageUrl,
-      },
-    ];
-
-    Logger.debug(`Trying to insert new artists: ${JSON.stringify(artists)}`);
-
-    await Promise.allSettled(
-      artists.map(async (artist) =>
-        this.artistService.insert({
-          name: artist.artistName,
-          imageUrl: artist?.imageUrl,
-        }),
-      ),
-    );
+    Logger.debug(`Trying to upsert artists`);
 
     try {
-      const artist = await this.artistService.findOneByName(
-        createSongDto.artistName,
+      await Promise.all(
+        createSongDto.contributors.map(
+          async (artist) =>
+            await queryRunner.manager.save(Artist, {
+              name: artist.artistName,
+              imageUrl: '',
+            }),
+        ),
       );
 
-      const song = await this.insert({ ...createSongDto, artist });
+      const artist = await queryRunner.manager.save(Artist, {
+        name: createSongDto?.artistName,
+        imageUrl: createSongDto?.artistImageUrl,
+      });
 
-      const contributors = await this.contributorService.createContributors(
-        createSongDto.contributors,
-        song,
+      const song = await queryRunner.manager.save(Song, {
+        name: createSongDto.name,
+        album: createSongDto.album,
+        releaseDate: createSongDto.releaseDate,
+        coverUrl: createSongDto.coverUrl,
+        contributors: createSongDto.contributors,
+        artist: artist,
+      } as DeepPartial<Song>);
+
+      const contributersToCreate =
+        await this.contributorService.createContributerDocs(
+          createSongDto.contributors,
+          song,
+        );
+
+      const contributors = await queryRunner.manager.save(
+        SongContributor,
+        contributersToCreate,
       );
 
       const songWords = this.songWordService.convertLyricsToSongWords(
@@ -193,15 +204,20 @@ export class SongService {
         song,
       );
 
-      await this.songWordService.insertMany(songWords);
+      await queryRunner.manager.save(SongWord, songWords);
+
+      await queryRunner.commitTransaction();
 
       Logger.log(`New song created: ${song?.id}`);
 
       return { success: true, song, contributors, songWords };
     } catch (error) {
+      Logger.error('Rolling back transaction');
       Logger.error(error.toString());
-
+      queryRunner.rollbackTransaction();
       throw error;
+    } finally {
+      queryRunner.release();
     }
   }
 
