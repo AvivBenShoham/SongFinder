@@ -40,6 +40,18 @@ export class SongContributorService {
   }
 
   async createContributors(basicContributor: addContributor[], song: Song) {
+    const contributorsToCreate = await this.createContributerDocs(
+      basicContributor,
+      song,
+    );
+
+    return this.insertMany(contributorsToCreate);
+  }
+
+  async createContributerDocs(
+    basicContributor: addContributor[],
+    song: Song,
+  ): Promise<createContributorDto[]> {
     const contributors = (await this.artistService.changeNamesToIds(
       basicContributor,
     )) as Array<{
@@ -53,6 +65,6 @@ export class SongContributorService {
       },
     );
 
-    return this.insertMany(contributorsToCreate);
+    return contributorsToCreate;
   }
 }

@@ -1,10 +1,7 @@
 import { BadRequestException, Injectable, Logger } from '@nestjs/common';
 import {
-  In,
   Repository,
-  MoreThanOrEqual,
   SelectQueryBuilder,
-  InsertResult,
   QueryRunner,
   DeepPartial,
   Connection,
@@ -18,6 +15,8 @@ import { SongWordService } from '../songWord/songWord.service';
 import { ArtistService } from '../artist/artist.service';
 import { SongContributorService } from '../songContributor/songContributor.service';
 import { Artist } from '../artist/artist.entity';
+import { SongContributor } from '../songContributor/songContributor.entity';
+import { SongWord } from '../songWord/songWord.entity';
 
 @Injectable()
 export class SongService {
@@ -161,23 +160,10 @@ export class SongService {
 
   public async create(createSongDto: createSongReqDto) {
     Logger.debug(`'Trying to create: ${JSON.stringify(createSongDto)}`);
-    const queryRunner = new Map<string, QueryRunner>([
-      ['song', this.songRepository.manager.connection.createQueryRunner()],
-      ['artist', await this.artistService.createQueryRunner()],
-      ['contributer', await this.contributorService.createQueryRunner()],
-      ['songWord', await this.songWordService.createQueryRunner()],
-    ]);
 
-    const queryRunner2 = this.songRepository.manager.connection.createQueryRunner();
-
-    const startTransaction = await Promise.all(
-      Array.from(queryRunner.values()).map(async (runner) => {
-        console.log('Runner', runner);
-        await runner.connect();
-        await runner.startTransaction();
-      }),
-    );
-    console.log(startTransaction);
+    const queryRunner = this.connection.createQueryRunner();
+    await queryRunner.connect();
+    await queryRunner.startTransaction();
 
     const isAlreadyExists =
       await this.findSongByNameAndContributors(createSongDto);
@@ -192,19 +178,19 @@ export class SongService {
       await Promise.all(
         createSongDto.contributors.map(
           async (artist) =>
-            await queryRunner.get('artist').manager.save({
+            await queryRunner.manager.save(Artist, {
               name: artist.artistName,
               imageUrl: '',
             }),
         ),
       );
 
-      const artist = await queryRunner.get('artist').manager.save(Artist, {
+      const artist = await queryRunner.manager.save(Artist, {
         name: createSongDto?.artistName,
         imageUrl: createSongDto?.artistImageUrl,
       });
 
-      const song = await queryRunner.get('song').manager.save(Song, {
+      const song = await queryRunner.manager.save(Song, {
         name: createSongDto.name,
         album: createSongDto.album,
         releaseDate: createSongDto.releaseDate,
@@ -213,28 +199,25 @@ export class SongService {
         artist: artist,
       } as DeepPartial<Song>);
 
-      // const song = await queryRunner.get('song').manager.save(songToSave);
-
       const contributersToCreate =
         await this.contributorService.createContributerDocs(
           createSongDto.contributors,
           song,
         );
 
-      const contributors = await queryRunner
-        .get('contributer')
-        .manager.save(contributersToCreate);
+      const contributors = await queryRunner.manager.save(
+        SongContributor,
+        contributersToCreate,
+      );
 
       const songWords = this.songWordService.convertLyricsToSongWords(
         createSongDto.lyrics,
         song,
       );
 
-      await queryRunner.get('songWord').manager.save(songWords);
+      await queryRunner.manager.save(SongWord, songWords);
 
-      Object.values(queryRunner).map(
-        async (runner) => await runner.commitTransaction(),
-      );
+      await queryRunner.commitTransaction();
 
       Logger.log(`New song created: ${song?.id}`);
 
@@ -242,18 +225,10 @@ export class SongService {
     } catch (error) {
       Logger.error('Rolling back transaction');
       Logger.error(error.toString());
-      await Promise.all(
-        Array.from(queryRunner.values()).map(
-          async (runner) => await runner.rollbackTransaction(),
-        ),
-      );
+      queryRunner.rollbackTransaction();
       throw error;
     } finally {
-      await Promise.all(
-        Array.from(queryRunner.values()).map(async (runner) =>
-          runner.release(),
-        ),
-      );
+      queryRunner.release();
     }
   }
 
