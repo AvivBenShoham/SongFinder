@@ -1,8 +1,9 @@
-import { Controller, Get } from '@nestjs/common';
+import { Controller, Get, Param, Query } from '@nestjs/common';
 import { ApiTags } from '@nestjs/swagger';
 import { ArtistService } from '../artist/artist.service';
 import { SongService } from '../song/song.service';
 import { SongWordService } from '../songWord/songWord.service';
+import { PositiveNumberPipe } from 'src/customValidators/checkPositiveParam.pipe';
 
 @Controller('statistics')
 @ApiTags('statistics')
@@ -21,9 +22,19 @@ export class StatisticsController {
         artists: await this.artistService.getTotalArtists(),
         words: await this.songWordService.getTotalWords(),
       },
-      artistWithMostSongs: await this.artistService.getArtistWithMostSongs(),
       wordsWithMostAppearances:
         await this.songWordService.getWordsWithMostAppearances(),
     };
+  }
+
+  @Get('/artistWithMostSongs')
+  @ApiTags('statistics')
+  async artistWithMostSongs(
+    @Query('page') page: number = 1,
+    @Query('pageSize') pageSize: number = 10,
+  ) {
+    console.log('page', page);
+    console.log('pageSize', pageSize);
+    return this.artistService.getArtistWithMostSongs(page, pageSize);
   }
 }
