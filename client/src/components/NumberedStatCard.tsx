@@ -1,3 +1,4 @@
+import { LinearProgress } from "@mui/material";
 import Box from "@mui/material/Box";
 import Card from "@mui/material/Card";
 import CardContent from "@mui/material/CardContent";
@@ -5,13 +6,14 @@ import Typography from "@mui/material/Typography";
 
 interface NumberedStatCard {
   name: string;
-  count: number
+  count: number;
+  isFetching ?: boolean;
 }
 
 export default function NumberedStatCard({
   name = "",
   count = 0,
-  ...props
+  isFetching = false,
 }: NumberedStatCard) {
 
   return (
@@ -47,9 +49,16 @@ export default function NumberedStatCard({
           >
           </Typography>
           <Box sx={{ height: 8 }} /> {/* Add padding */}
-          <Typography variant="h3" sx={{ color: "text.secondary", textAlign: "center" }}>
-            {count}
-          </Typography>
+          {
+            isFetching ?
+            <Typography variant="h3" sx={{ color: "text.secondary", textAlign: "center" }}>
+              <LinearProgress /> 
+            </Typography>
+            :
+            <Typography variant="h3" sx={{ color: "text.secondary", textAlign: "center" }}>
+              {count}
+            </Typography>
+          }
         </CardContent>
       </Box>
     </Card>

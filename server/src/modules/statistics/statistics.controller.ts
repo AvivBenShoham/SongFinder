@@ -34,4 +34,14 @@ export class StatisticsController {
   ) {
     return this.artistService.getArtistWithMostSongs(page, pageSize);
   }
+
+  @Get('/averages')
+  async averages() {
+    return {
+      songWordAverage: await this.songWordService.getAverageWordsPerSong(),
+      charAveragePerWord: await this.songWordService.getAverageCharsPerWord(),
+      charAveragePerLine: await this.songWordService.getAverageCharsPerLine(),
+      stanzaAverage: await this.songWordService.getAverageStanzasPerSong(),
+    };
+  }
 }
