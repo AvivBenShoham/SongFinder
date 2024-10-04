@@ -40,17 +40,12 @@ export class SongWordService {
       queryBuilder.andWhere('song_word.song IN (:...songs)', { songs });
     }
 
-    // TODO: CHECK IF CAN REFACTOR TO HANDLE THIS WITH JOIN
     if (groups.length > 0) {
-      const groupsResult = await this.wordGroupService.findByGroupName(
-        ...groups,
-      );
-
-      const groupWords = groupsResult.map(({ word }) => word);
-
-      queryBuilder.andWhere('song_word.word IN (:...groupWords)', {
-        groupWords,
-      });
+      queryBuilder
+        .leftJoin('word_group', 'wordGroup', 'song_word.word = wordGroup.word')
+        .andWhere('wordGroup.group_name IN (:...groupName)', {
+          groupName: groups,
+        });
     }
 
     const positions = {
