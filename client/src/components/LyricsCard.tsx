@@ -38,8 +38,6 @@ export default function LyricsCard({ songId, hoveredMatch }: SongCardProps) {
   const mutation = useCreatePhraseMutation({ songId });
   const [searchParams] = useSearchParams();
 
-  console.log(searchParams.get("word"));
-
   const handleContextMenu = (event: React.MouseEvent) => {
     event.preventDefault();
     setContextMenu(
@@ -78,13 +76,22 @@ export default function LyricsCard({ songId, hoveredMatch }: SongCardProps) {
     stanzaIndex: number;
     lineIndex: number;
     col: number;
-  }) =>
+  }) => 
     (hoveredMatch || [])?.some(
       (songWord) =>
         songWord.col === col + 1 &&
         songWord.line === lineIndex + 1 &&
         songWord.stanza === stanzaIndex + 1
     );
+
+
+  const isWordFromUrlRedirect = (stanzaIndex: number, lineIndex: number, col: number) => {
+    return (
+      searchParams.get("stanza") && searchParams.get("line") && searchParams.get("col") &&
+      stanzaIndex == Number(searchParams.get("stanza")) && 
+      lineIndex == Number(searchParams.get("line")) && 
+      col == Number(searchParams.get("col")));
+  };
 
   const selectedWord = searchParams.get("word");
 
@@ -163,6 +170,10 @@ export default function LyricsCard({ songId, hoveredMatch }: SongCardProps) {
                                     bgcolor: "primary.main",
                                     color: "primary.contrastText",
                                     fontWeight: 600,
+                                  }),
+                                  ...(isWordFromUrlRedirect(stanzaIndex + 1, lineIndex + 1, col + 1) && {
+                                    bgcolor: "lightgreen",
+                                    color: "primary.text",
                                   }),
                                   ...(selectedWord &&
                                     formatText(word) ===
