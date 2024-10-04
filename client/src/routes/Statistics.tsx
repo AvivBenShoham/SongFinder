@@ -1,15 +1,13 @@
-import * as React from "react";
 import Typography from "@mui/material/Typography";
-import { Box, Stack } from "@mui/material";
-import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { Stack } from "@mui/material";
+import { useQuery } from "@tanstack/react-query";
 import httpClient from "../httpClient";
-import { useNavigate } from "react-router-dom";
 import NumberedStatCard from "../components/NumberedStatCard";
 import ArtistTable from "../components/ArtistTable";
 import WordCloud from "../components/WordCloud";
+import AverageStats from "../components/AverageStats";
 
 export default function Statistics() {
-  const navigate = useNavigate();
   const { data: {counts, wordsWithMostAppearances } } = useQuery({
     queryKey: ["statistics"],
     queryFn: async () => (await httpClient.get(`statistics`)).data,
@@ -48,6 +46,7 @@ export default function Statistics() {
       <Stack direction="row" justifyContent="space-evenly" paddingTop="1rem">
         <ArtistTable artistCount={counts?.artists}/>
         <WordCloud words={wordsWithMostAppearances} height={400} width={400} />
+        <AverageStats />
       </Stack>
     </Stack>
   );

@@ -301,4 +301,62 @@ export class SongWordService {
 
     return parseInt(result.count);
   }
+
+  async getAverageWordsPerSong(): Promise<number> {
+    const avgWordPerSong = await this.songWordRepository
+      .createQueryBuilder()
+      .select('AVG(song_word_count.word_count)', 'avgWordCount')
+      .from((subQuery) => {
+        return subQuery
+          .select('songWords.song_id', 'song_id')
+          .addSelect('COUNT(*)', 'word_count')
+          .from('song_words', 'songWords')
+          .groupBy('songWords.song_id');
+      }, 'song_word_count')
+      .getRawOne();
+
+    return parseInt(avgWordPerSong.avgWordCount);
+  }
+
+  async getAverageCharsPerWord(): Promise<number> {
+    const result = await this.songWordRepository
+      .createQueryBuilder('song_word')
+      .select('AVG(LENGTH(song_word.word))', 'average')
+      .getRawOne();
+
+    return Math.round(result.average);
+  }
+
+  async getAverageCharsPerLine(): Promise<number> {
+    const avgWordPerLine = await this.songWordRepository
+      .createQueryBuilder()
+      .select('AVG(song_word_count.char_count)', 'avgWordCount')
+      .from((subQuery) => {
+        return subQuery
+          .select('songWords.song_id', 'song_id')
+          .addSelect('songWords.line', 'line')
+          .addSelect('SUM(LENGTH(songWords.word))', 'char_count')
+          .from('song_words', 'songWords')
+          .groupBy('songWords.song_id, songWords.line');
+      }, 'song_word_count')
+      .getRawOne();
+
+    return parseInt(avgWordPerLine.avgWordCount);
+  }
+
+  async getAverageStanzasPerSong(): Promise<number> {
+    const avgStanzaPerSong = await this.songWordRepository
+      .createQueryBuilder()
+      .select('AVG(song_word_count.stanza_count)', 'avgStanzaCount')
+      .from((subQuery) => {
+        return subQuery
+          .select('songWords.song_id', 'song_id')
+          .addSelect('COUNT(DISTINCT(songWords.stanza))', 'stanza_count')
+          .from('song_words', 'songWords')
+          .groupBy('songWords.song_id');
+      }, 'song_word_count')
+      .getRawOne();
+
+    return parseInt(avgStanzaPerSong.avgStanzaCount);
+  }
 }
