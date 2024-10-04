@@ -5,15 +5,19 @@ import {
   MoreThanOrEqual,
   SelectQueryBuilder,
   InsertResult,
+  QueryRunner,
+  DeepPartial,
+  Connection,
 } from 'typeorm';
 import { Song } from './song.entity';
-import { InjectRepository } from '@nestjs/typeorm';
+import { InjectConnection, InjectRepository } from '@nestjs/typeorm';
 import createSongReqDto, { createSongDto } from './song.dto';
 import { formatText, getQueryParamList } from 'src/utils';
 import { GetSongsQueryParams } from './dtos';
 import { SongWordService } from '../songWord/songWord.service';
 import { ArtistService } from '../artist/artist.service';
 import { SongContributorService } from '../songContributor/songContributor.service';
+import { Artist } from '../artist/artist.entity';
 
 @Injectable()
 export class SongService {
@@ -23,6 +27,7 @@ export class SongService {
     private readonly songWordService: SongWordService,
     private readonly artistService: ArtistService,
     private readonly contributorService: SongContributorService,
+    @InjectConnection() private readonly connection: Connection,
   ) {}
 
   private buildPaginationQuery(
@@ -144,8 +149,35 @@ export class SongService {
       .getRawMany();
   }
 
+  private async startTransaction(queryRunner: Map<string, QueryRunner>) {
+    return Promise.all(
+      Array.from(queryRunner.values()).map(async (runner) => {
+        console.log('Runner', runner);
+        await runner.connect();
+        await runner.startTransaction();
+      }),
+    );
+  }
+
   public async create(createSongDto: createSongReqDto) {
     Logger.debug(`'Trying to create: ${JSON.stringify(createSongDto)}`);
+    const queryRunner = new Map<string, QueryRunner>([
+      ['song', this.songRepository.manager.connection.createQueryRunner()],
+      ['artist', await this.artistService.createQueryRunner()],
+      ['contributer', await this.contributorService.createQueryRunner()],
+      ['songWord', await this.songWordService.createQueryRunner()],
+    ]);
+
+    const queryRunner2 = this.songRepository.manager.connection.createQueryRunner();
+
+    const startTransaction = await Promise.all(
+      Array.from(queryRunner.values()).map(async (runner) => {
+        console.log('Runner', runner);
+        await runner.connect();
+        await runner.startTransaction();
+      }),
+    );
+    console.log(startTransaction);
 
     const isAlreadyExists =
       await this.findSongByNameAndContributors(createSongDto);
@@ -154,54 +186,74 @@ export class SongService {
     if (isAlreadyExists)
       throw new BadRequestException('the song already exists');
 
-    const artists = [
-      ...createSongDto.contributors.map((artist) => ({
-        artistName: artist.artistName,
-        imageUrl: '',
-      })),
-      {
-        artistName: createSongDto?.artistName,
-        imageUrl: createSongDto?.artistImageUrl,
-      },
-    ];
-
-    Logger.debug(`Trying to insert new artists: ${JSON.stringify(artists)}`);
-
-    await Promise.allSettled(
-      artists.map(async (artist) =>
-        this.artistService.insert({
-          name: artist.artistName,
-          imageUrl: artist?.imageUrl,
-        }),
-      ),
-    );
+    Logger.debug(`Trying to upsert artists`);
 
     try {
-      const artist = await this.artistService.findOneByName(
-        createSongDto.artistName,
+      await Promise.all(
+        createSongDto.contributors.map(
+          async (artist) =>
+            await queryRunner.get('artist').manager.save({
+              name: artist.artistName,
+              imageUrl: '',
+            }),
+        ),
       );
 
-      const song = await this.insert({ ...createSongDto, artist });
+      const artist = await queryRunner.get('artist').manager.save(Artist, {
+        name: createSongDto?.artistName,
+        imageUrl: createSongDto?.artistImageUrl,
+      });
 
-      const contributors = await this.contributorService.createContributors(
-        createSongDto.contributors,
-        song,
-      );
+      const song = await queryRunner.get('song').manager.save(Song, {
+        name: createSongDto.name,
+        album: createSongDto.album,
+        releaseDate: createSongDto.releaseDate,
+        coverUrl: createSongDto.coverUrl,
+        contributors: createSongDto.contributors,
+        artist: artist,
+      } as DeepPartial<Song>);
+
+      // const song = await queryRunner.get('song').manager.save(songToSave);
+
+      const contributersToCreate =
+        await this.contributorService.createContributerDocs(
+          createSongDto.contributors,
+          song,
+        );
+
+      const contributors = await queryRunner
+        .get('contributer')
+        .manager.save(contributersToCreate);
 
       const songWords = this.songWordService.convertLyricsToSongWords(
         createSongDto.lyrics,
         song,
       );
 
-      await this.songWordService.insertMany(songWords);
+      await queryRunner.get('songWord').manager.save(songWords);
+
+      Object.values(queryRunner).map(
+        async (runner) => await runner.commitTransaction(),
+      );
 
       Logger.log(`New song created: ${song?.id}`);
 
       return { success: true, song, contributors, songWords };
     } catch (error) {
+      Logger.error('Rolling back transaction');
       Logger.error(error.toString());
-
+      await Promise.all(
+        Array.from(queryRunner.values()).map(
+          async (runner) => await runner.rollbackTransaction(),
+        ),
+      );
       throw error;
+    } finally {
+      await Promise.all(
+        Array.from(queryRunner.values()).map(async (runner) =>
+          runner.release(),
+        ),
+      );
     }
   }
 
