@@ -1,5 +1,4 @@
-import { Entity, ManyToMany, PrimaryColumn } from 'typeorm';
-import { SongWord } from '../songWord/songWord.entity';
+import { Entity, Index, PrimaryColumn } from 'typeorm';
 
 @Entity({ name: 'word_group' })
 export class WordGroup {
@@ -7,5 +6,6 @@ export class WordGroup {
   word: string;
 
   @PrimaryColumn({ type: 'varchar', length: 50, name: 'group_name' })
+  @Index()
   groupName: string;
 }
