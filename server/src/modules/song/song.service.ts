@@ -50,6 +50,21 @@ export class SongService {
       queryBuilder
         .innerJoinAndSelect('song.lyrics', 'song_words')
         .andWhere('song_words.word IN (:...words)', { words });
+
+      queryBuilder.andWhere((qb) => {
+        const subQuery = qb
+          .subQuery()
+          .select('song_words_filter.song_id')
+          .from(SongWord, 'song_words_filter')
+          .where('song_words_filter.word IN (:...words)', { words })
+          .groupBy('song_words_filter.song_id')
+          .having('COUNT(DISTINCT song_words_filter.word) = :wordsLength', {
+            wordsLength: words.length,
+          })
+          .getQuery();
+
+        return `song.id IN ${subQuery}`;
+      });
     }
 
     if (albums.length > 0) {

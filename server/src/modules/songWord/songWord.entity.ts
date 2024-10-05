@@ -4,6 +4,7 @@ import { Song } from '../song/song.entity';
 @Entity({ name: 'song_words' })
 @Index(['songId', 'line'])
 @Index(['songId', 'stanza'])
+@Index(['songId', 'word'])
 export class SongWord {
   @PrimaryColumn({ type: 'varchar', length: 100 })
   @Index()
