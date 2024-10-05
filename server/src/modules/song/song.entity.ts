@@ -31,8 +31,8 @@ export class Song {
   @Column({ type: 'varchar', length: 500, nullable: true, name: 'cover_url' })
   coverUrl: URL;
 
-  @ManyToOne(() => Artist, (artist) => artist.name)
-  @JoinColumn({ name: 'artist_name' })
+  @ManyToOne(() => Artist, (artist) => artist.artistId)
+  @JoinColumn({ name: 'artist_id' })
   artist: Artist;
 
   @OneToMany(() => SongWord, (songWord) => songWord.song)
