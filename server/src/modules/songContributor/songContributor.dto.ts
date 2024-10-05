@@ -1,7 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { Artist } from '../artist/artist.entity';
 import { IsEnum, IsNotEmpty, IsString } from 'class-validator';
-import { Transform } from 'class-transformer';
 import { Song } from '../song/song.entity';
 
 export enum ContributorType {
@@ -21,6 +20,8 @@ export default class addContributor {
   @IsNotEmpty()
   @IsString()
   artistName: Artist['name'];
+
+  artistId?: Artist['artistId'];
 }
 
 export class createContributorDto {

@@ -32,7 +32,7 @@ export class Song {
   coverUrl: URL;
 
   @ManyToOne(() => Artist, (artist) => artist.name)
-  @JoinColumn()
+  @JoinColumn({ name: 'artist_name' })
   artist: Artist;
 
   @OneToMany(() => SongWord, (songWord) => songWord.song)

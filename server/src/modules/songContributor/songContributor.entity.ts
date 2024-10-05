@@ -24,6 +24,7 @@ export class SongContributor {
   @JoinColumn({ name: 'artist_id' })
   artist: Artist;
 
+  @JoinColumn({ name: 'song_id' })
   @ManyToOne(() => Song, (song) => song.contributors)
   song: Song;
 }

@@ -38,33 +38,4 @@ export class SongContributorService {
       this.songContribuerRepository.create(songContributors);
     return this.songContribuerRepository.save(newSongContributors);
   }
-
-  async createContributors(basicContributor: addContributor[], song: Song) {
-    const contributorsToCreate = await this.createContributerDocs(
-      basicContributor,
-      song,
-    );
-
-    return this.insertMany(contributorsToCreate);
-  }
-
-  async createContributerDocs(
-    basicContributor: addContributor[],
-    song: Song,
-  ): Promise<createContributorDto[]> {
-    const contributors = (await this.artistService.changeNamesToIds(
-      basicContributor,
-    )) as Array<{
-      artistId: number;
-      type: ContributorType;
-    }>;
-
-    const contributorsToCreate: Array<createContributorDto> = contributors.map(
-      (contributor) => {
-        return { ...contributor, song };
-      },
-    );
-
-    return contributorsToCreate;
-  }
 }

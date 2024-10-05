@@ -7,6 +7,6 @@ export class SongPhrase {
   phrase: string;
 
   @ManyToOne(() => Song, (song) => song.id)
-  @PrimaryColumn({ type: 'int', name: 'songId' })
+  @PrimaryColumn({ type: 'int', name: 'song_id' })
   song: Song;
 }

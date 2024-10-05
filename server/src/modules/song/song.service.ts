@@ -2,7 +2,6 @@ import { BadRequestException, Injectable, Logger } from '@nestjs/common';
 import {
   Repository,
   SelectQueryBuilder,
-  QueryRunner,
   DeepPartial,
   Connection,
 } from 'typeorm';
@@ -17,6 +16,7 @@ import { SongContributorService } from '../songContributor/songContributor.servi
 import { Artist } from '../artist/artist.entity';
 import { SongContributor } from '../songContributor/songContributor.entity';
 import { SongWord } from '../songWord/songWord.entity';
+import { createContributorDto } from '../songContributor/songContributor.dto';
 
 @Injectable()
 export class SongService {
@@ -173,26 +173,50 @@ export class SongService {
     const isAlreadyExists =
       await this.findSongByNameAndContributors(createSongDto);
 
-    if (isAlreadyExists)
+    if (isAlreadyExists) {
+      await queryRunner.release();
       throw new BadRequestException('the song already exists');
+    }
 
     Logger.debug(`Trying to upsert artists`);
 
     try {
-      await Promise.all(
-        createSongDto.contributors.map(
-          async (artist) =>
-            await queryRunner.manager.save(Artist, {
-              name: artist.artistName,
-              imageUrl: '',
-            }),
-        ),
+      const contributorsToCreate = await Promise.all(
+        createSongDto.contributors.map(async (artist) => {
+          const contributerRaw = await (
+            await queryRunner.manager.upsert(
+              Artist,
+              {
+                name: artist.artistName,
+              },
+              ['name'],
+            )
+          ).raw[0];
+
+          return {
+            type: artist.type,
+            artistId: contributerRaw?.artist_id,
+            song: null,
+          } as createContributorDto;
+        }) as unknown as createContributorDto[],
       );
 
-      const artist = await queryRunner.manager.save(Artist, {
+      const artistUpsertedRaw = await (
+        await queryRunner.manager.upsert(
+          Artist,
+          {
+            name: createSongDto?.artistName,
+            imageUrl: createSongDto?.artistImageUrl,
+          },
+          ['name'],
+        )
+      ).raw[0];
+
+      const artist = {
         name: createSongDto?.artistName,
         imageUrl: createSongDto?.artistImageUrl,
-      });
+        artistId: artistUpsertedRaw?.artist_id,
+      } as Artist;
 
       const song = await queryRunner.manager.save(Song, {
         name: createSongDto.name,
@@ -203,15 +227,13 @@ export class SongService {
         artist: artist,
       } as DeepPartial<Song>);
 
-      const contributersToCreate =
-        await this.contributorService.createContributerDocs(
-          createSongDto.contributors,
-          song,
-        );
+      contributorsToCreate.forEach((contributor) => {
+        contributor.song = song;
+      });
 
       const contributors = await queryRunner.manager.save(
         SongContributor,
-        contributersToCreate,
+        contributorsToCreate,
       );
 
       const songWords = this.songWordService.convertLyricsToSongWords(
@@ -229,10 +251,10 @@ export class SongService {
     } catch (error) {
       Logger.error('Rolling back transaction');
       Logger.error(error.toString());
-      queryRunner.rollbackTransaction();
+      await queryRunner.rollbackTransaction();
       throw error;
     } finally {
-      queryRunner.release();
+      await queryRunner.release();
     }
   }
 
