@@ -95,8 +95,8 @@ export class SongService {
     if (query.page && query.pageSize) {
       queryBuilder
         .orderBy('song.releaseDate')
-        .skip((query.page - 1) * query.pageSize)
-        .take(query.pageSize);
+        .offset((query.page - 1) * query.pageSize)
+        .limit(query.pageSize);
     }
 
     return queryBuilder;

@@ -77,11 +77,9 @@ export class SongPhraseService {
   }
 
   async insert(songPhrase: createSongPhrase) {
-    const song = await this.songService.findOne(songPhrase.songId);
-
     return this.songPhraseRepository.save({
       phrase: songPhrase.phrase.toLowerCase(),
-      song,
+      song: songPhrase.songId,
     });
   }
 }

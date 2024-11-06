@@ -16,7 +16,6 @@ export class SongWordService {
     private songWordRepository: Repository<SongWord>,
     @InjectRepository(Song)
     private songRepository: Repository<Song>,
-    private wordGroupService: WordGroupService,
   ) {}
 
   private async buildSongWordsFilter(query: GetSongWordsQueryParams) {
@@ -42,7 +41,7 @@ export class SongWordService {
 
     if (groups.length > 0) {
       queryBuilder
-        .leftJoin('word_group', 'wordGroup', 'song_word.word = wordGroup.word')
+        .innerJoin('word_group', 'wordGroup', 'song_word.word = wordGroup.word')
         .andWhere('wordGroup.group_name IN (:...groupName)', {
           groupName: groups,
         });
@@ -87,8 +86,8 @@ export class SongWordService {
         )
         .groupBy('song_word.word')
         .orderBy('song_word.word')
-        .skip((query.page - 1) * query.pageSize)
-        .take(query.pageSize);
+        .offset((query.page - 1) * query.pageSize)
+        .limit(query.pageSize);
     }
 
     return queryBuilder;

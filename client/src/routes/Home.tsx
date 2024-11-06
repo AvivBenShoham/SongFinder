@@ -122,10 +122,12 @@ export default function Home() {
         />
         <LocalizationProvider dateAdapter={AdapterDayjs}>
           <DatePicker
-            label="Filter by date"
+            label="Filter from date"
             slotProps={{ textField: { size: "small" } }}
             sx={{ minWidth: 200 }}
-            value={dayjs(searchParams.get("date") || "")}
+            value={
+              searchParams.get("date") ? dayjs(searchParams.get("date")) : null
+            }
             format="DD/MM/YYYY"
             onChange={(newValue) => handleSearchParamsChange("date", newValue)}
           />
